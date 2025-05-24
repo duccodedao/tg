@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>TON</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/ton-connect-bmass.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+  <link rel="stylesheet" href="/wallet/wallet.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  
+</head>
+<body>
+
+  <div id="connect-only">
+    <div id="connect-wallet"></div>
+  </div>
+
+
+  <div class="container" id="main-content">
+    <p class="info">
+      
+      <span id="wallet-address" data-full-address=""></span>
+      
+
+    </p>
+    <p id="wallet-balance" class="balance">Loading...</p>
+    <div class="form-send">
+      <h2>Sent TON</h2>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Ô Address có nút Dán -->
+<div class="input-icon">
+  <span class="icon">📬</span>
+  <input type="text" id="to-address" placeholder="Address">
+
+</div>
+
+<!-- Ô Amount có nút Max -->
+<div class="input-icon">
+  <img src="/logo-coin/ton.jpg" alt="TON Logo" class="input-logo">
+  <input type="number" id="ton-amount" placeholder="Amount" step="0.01" min="0">
+
+</div>
+
+
+      
+
+      <div class="input-icon">
+        <span class="icon">📝</span>
+        <input type="text" id="memo-text" placeholder="Memo" disabled>
+      </div>
+    
+      
+
+      <div class="button-container">
+        <button id="send-ton-btn"><i class="fas fa-paper-plane"></i> Sent Transaction</button>
+        <div class="button-row">
+          <button id="show-qr-btn"><i class="fas fa-wallet"></i> Deposit TON</button>
+          <button id="disconnect"><i class="fas fa-sign-out-alt"></i> Disconnect</button>
+        </div>
+      </div>
+      
+      
+    </div>
+    
+    <ul id="transactions-list"></ul>
+</div>
+
+
+<!-- Modal popup -->
+<div id="transaction-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>Thông tin giao dịch</h2>
+    <div id="transaction-details"></div>
+  </div>
+</div>
+
+
+
+
+<div id="qr-modal" class="modal">
+  <div class="modal-content">
+    <span id="close-qr" class="close-btn">✖</span>
+
+    <canvas id="qr-canvas" class="qr-canvas"></canvas>
+    <p id="qr-address" class="qr-address">Địa chỉ ví: <span id="address">0x1234567890abcdef</span></p>
+    <button id="copy-btn" onclick="copyAddress()" class="copy-btn">Copy Address</button>
+  </div>
+</div>
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+
+<script src="/wallet/wallet2.js"></script>
+  
+</body>
+</html>

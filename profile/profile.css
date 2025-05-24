@@ -1,0 +1,406 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body */
+body {
+    font-family: 'Arial', sans-serif; /* Giữ Arial nhưng thêm fallbacks */
+    background-color: #f0f2f5; /* Giữ màu nền cũ */
+    padding: 20px;
+    color: #333;
+    line-height: 1.6; /* Tăng line-height cho dễ đọc hơn */
+}
+
+/* Connect Wallet Section */
+#connect-only {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+ 
+}
+
+#connect-wallet {
+    background-color: #008CBA; /* Màu xanh nước biển như nút Wallet cũ */
+    color: white;
+    padding: 16px 30px;
+    border: none; /* Bỏ border mặc định */
+    border-radius: 25px; /* Giữ border-radius cũ */
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold; /* Thêm font-weight */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Thêm transition cho box-shadow */
+    box-shadow: 0 4px 10px rgba(0, 140, 186, 0.3); /* Thêm shadow nhẹ */
+}
+
+#connect-wallet:hover {
+    background-color: #007B9A; /* Giữ màu hover cũ */
+    transform: translateY(-3px); /* Hiệu ứng nổi nhẹ */
+    box-shadow: 0 6px 15px rgba(0, 140, 186, 0.4); /* Shadow mạnh hơn khi hover */
+}
+
+#connect-wallet:active {
+    transform: translateY(0); /* Trở về vị trí cũ khi click */
+    box-shadow: 0 2px 5px rgba(0, 140, 186, 0.2); /* Shadow nhỏ hơn khi active */
+}
+
+/* Main Content Container */
+#main-content {
+    max-width: 800px;
+    margin: 16px auto; /* Giữ margin cũ */
+    margin-top: 85px; /* Giữ margin-top cũ */
+    background-color: #ffffff;
+    padding: 25px; /* Tăng padding nhẹ */
+    border-radius: 25px; /* Giữ border-radius cũ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Shadow mạnh hơn và mềm mại hơn */
+}
+
+/* Button Container */
+.btn-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Linh hoạt hơn với auto-fit và minmax */
+    gap: 12px; /* Tăng gap nhẹ */
+    margin: 15px 0; /* Điều chỉnh margin */
+}
+
+/* General Button Styling */
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0; /* Điều chỉnh padding */
+    border: none;
+    border-radius: 25px; /* Giữ border-radius cũ */
+    font-size: 13px; /* Điều chỉnh font-size */
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Thêm transition cho box-shadow */
+    text-transform: uppercase;
+    gap: 6px;
+    height: auto; /* Để chiều cao nút tự động theo nội dung */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); /* Shadow nhẹ cho nút */
+}
+
+.btn:hover {
+    transform: translateY(-3px); /* Giữ hiệu ứng cũ */
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2); /* Shadow mạnh hơn khi hover */
+}
+
+.btn:active {
+    transform: translateY(0); /* Trở về vị trí cũ khi click */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); /* Shadow nhỏ hơn khi active */
+}
+
+/* Specific Button Styles */
+.btn-jetton {
+    background-color: #4CAF50; /* Giữ màu cũ */
+}
+
+.btn-jetton:hover {
+    background-color: #45a049; /* Giữ màu hover cũ */
+}
+
+.btn-wallet {
+    background-color: #008CBA; /* Giữ màu cũ */
+}
+
+.btn-wallet:hover {
+    background-color: #007B9A; /* Giữ màu hover cũ */
+}
+
+/* Disconnect Button */
+#disconnect {
+    background-color: #f44336; /* Giữ màu cũ */
+    color: white;
+    padding: 10px 20px; /* Giữ padding cũ */
+    border-radius: 25px; /* Giữ border-radius cũ */
+    font-weight: bold;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Tăng gap cho text/spinner */
+    position: relative;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 3px 8px rgba(244, 67, 54, 0.2); /* Shadow nhẹ */
+}
+
+#disconnect:hover {
+    background-color: #d32f2f; /* Giữ màu hover cũ */
+    transform: translateY(-3px); /* Giữ hiệu ứng cũ */
+    box-shadow: 0 5px 12px rgba(244, 67, 54, 0.3); /* Shadow mạnh hơn khi hover */
+}
+
+#disconnect:active {
+    background-color: #d32f2f; /* Giữ màu active cũ */
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(244, 67, 54, 0.1);
+}
+
+/* Disconnect Button Loading State */
+#disconnect.loading {
+    pointer-events: none;
+    background-color: #d32f2f;
+    color: transparent; /* Ẩn chữ khi loading */
+}
+
+#disconnect.loading:before {
+    content: "";
+    position: absolute;
+    border: 3px solid rgba(255, 255, 255, 0.4); /* Màu border nhẹ hơn */
+    border-top: 3px solid #fff; /* Màu xoay trắng */
+    border-radius: 50%;
+    width: 20px; /* Điều chỉnh kích thước spinner */
+    height: 20px;
+    animation: spin 0.8s linear infinite; /* Tốc độ xoay nhanh hơn */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Info Container */
+.info-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Linh hoạt hơn */
+    gap: 16px; /* Điều chỉnh gap */
+    margin-top: 25px; /* Điều chỉnh margin-top */
+}
+
+/* Info Item */
+.info-item {
+    background: #e0e5ec; /* Giữ màu cũ */
+    border-radius: 14px; /* Giữ border-radius cũ */
+    padding: 18px; /* Tăng padding nhẹ */
+    box-shadow: inset 2px 2px 6px #c3c8d3, inset -2px -2px 6px #ffffff; /* Giữ shadow cũ */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-item:hover {
+    transform: translateY(-3px); /* Hiệu ứng nổi nhẹ hơn khi hover */
+    box-shadow: inset 3px 3px 8px #b5bbc6, inset -3px -3px 8px #ffffff; /* Shadow mạnh hơn khi hover */
+}
+
+/* Info Item Rows */
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Căn giữa theo chiều dọc */
+    font-size: 15px;
+    color: #333;
+    padding: 6px 0; /* Thêm padding cho các hàng */
+    border-bottom: 1px solid #e5e5e5; /* Thêm đường phân cách mỏng */
+}
+
+.row:last-child {
+    border-bottom: none; /* Bỏ border cho hàng cuối cùng */
+}
+
+.row div:first-child {
+    font-weight: bold;
+    color: #555;
+}
+
+/* Specific Info Content & Icons */
+#tg-avatar {
+    border-radius: 50%;
+    height: 48px; /* Điều chỉnh kích thước avatar */
+    width: 48px;
+    object-fit: cover;
+    border: 2px solid #008CBA; /* Thêm border nhẹ */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-address {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Khoảng cách giữa text và icon copy */
+    word-break: break-all; /* Đảm bảo địa chỉ dài xuống dòng */
+}
+
+#short-address,
+#friendly-address {
+    cursor: text; /* Đổi cursor thành text để dễ chọn */
+    color: #333; /* Giữ màu cũ */
+    text-decoration: none; /* Giữ không underline */
+    font-family: 'Courier New', Courier, monospace; /* Font monospace cho địa chỉ */
+    background-color: #f0f0f0; /* Thêm nền nhẹ cho địa chỉ */
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+#short-address:hover,
+#friendly-address:hover {
+    background-color: #e0e0e0; /* Nền tối hơn khi hover */
+}
+
+#tg-username,
+#tg-name,
+#tg-id {
+    color: #333; /* Giữ màu cũ */
+    text-decoration: none; /* Giữ không underline */
+    word-break: break-all;
+}
+
+/* Copy Icons */
+.fa-copy { /* Sử dụng class chung cho tất cả icon copy */
+    cursor: pointer;
+    color: #4CAF50; /* Giữ màu cũ */
+    font-size: 16px; /* Điều chỉnh kích thước icon */
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.fa-copy:hover {
+    color: #388E3C; /* Giữ màu hover cũ */
+    transform: scale(1.1); /* Hiệu ứng to ra nhẹ khi hover */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    #main-content {
+        padding: 15px; /* Giảm padding trên màn hình nhỏ */
+        margin: 10px auto;
+        margin-top: 75px; /* Điều chỉnh margin-top cho màn hình nhỏ */
+    }
+
+    .btn-container {
+        grid-template-columns: 1fr; /* 1 cột cho nút trên màn hình nhỏ */
+    }
+
+    .info-container {
+        grid-template-columns: 1fr; /* 1 cột cho info trên màn hình nhỏ */
+    }
+
+    #connect-wallet {
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+
+    .btn {
+        font-size: 11px;
+        padding: 6px 0;
+    }
+
+    #disconnect {
+        padding: 8px 15px;
+        font-size: 10px;
+    }
+
+    .row {
+        font-size: 14px;
+    }
+
+    #tg-avatar {
+        height: 40px;
+        width: 40px;
+    }
+}
+
+/* Footer Styles (nếu bạn vẫn để trong file riêng thì giữ nguyên) */
+/* Đảm bảo rằng margin và padding của body không ảnh hưởng đến footer */
+/* body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+} */ /* Đã có ở trên */
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #1b1b1b;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 80px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    margin: 0;
+    padding: 0;
+}
+
+.footer-item {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    color: #aaa;
+    font-size: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.footer-item i {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.footer-item:hover {
+    color: #00e0ff;
+}
+
+.footer-item.active {
+    color: #00e0ff;
+}
+
+.footer-item.active::after {
+    content: '';
+    display: none; /* Giữ nguyên display none nếu bạn không muốn chấm nhỏ */
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #00e0ff;
+    border-radius: 50%;
+}
+
+/* Home Nổi Bật */
+.footer-item.home {
+    position: relative;
+    top: -25px;
+    z-index: 101;
+}
+
+.footer-item.home .home-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #00e0ff, #006eff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 224, 255, 0.4);
+    margin: 0 auto 5px auto;
+}
+
+.footer-item.home i {
+    font-size: 26px;
+    color: #fff;
+    margin: 0;
+}
+
+.footer-item.home span {
+    margin-top: 3px;
+    display: block;
+    color: #fff;
+    font-size: 12px;
+}

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Jettons</title>
+  <link rel="stylesheet" href="/css/footer.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/ton-connect-bmass.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+</head>
+<style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+
+
+.jetton-item {
+  position: relative;
+  padding-top: 25px;
+}
+
+.jetton-price {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background-color: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+
+
+
+
+
+
+
+
+body {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  background: #e0e5ec;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  color: #333;
+  padding: 20px;
+  justify-content: flex-start;  /* ✅ sửa ở đây */
+}
+
+
+    #connect-only {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #disconnect-wallet {
+      margin-top: 20px;
+      display: none;
+      padding: 10px 20px;
+      background-color: #ff4c4c;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #2e3a59;
+      text-align: center;
+    }
+
+    #jettons-list {
+      width: 100%;
+      max-width: 600px;    
+
+    }
+
+    .jetton-item {
+      display: flex;
+      align-items: center;
+      background: #e0e5ec;
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      box-shadow: inset 2px 2px 6px #c3c8d3, inset -2px -2px 6px #ffffff;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .jetton-item:hover {
+      transform: translateY(-2px);
+      box-shadow: inset 2px 2px 8px #b5bbc6, inset -2px -2px 8px #ffffff;
+    }
+
+    .jetton-logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 16px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+      box-shadow: 2px 2px 4px #c3c8d3, -2px -2px 4px #ffffff;
+    }
+
+    .jetton-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 15px;
+      color: #2f3d59;
+    }
+
+    .jetton-info strong {
+      font-weight: 700;
+      color: #004c99;
+    }
+
+    .jetton-info p {
+      font-size: 14px;
+      color: #00796b;
+      font-weight: 600;
+      margin: 4px 0 0;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .jetton-item {
+        padding: 14px;
+      }
+
+      .jetton-logo {
+        width: 36px;
+        height: 36px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .jetton-info {
+        font-size: 14px;
+      }
+    }
+
+    #zero-balance-list {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 10px;
+  margin-bottom: 85px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+#see-all-btn {
+  all: unset;
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5); /* Màu mờ */
+  margin-top: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+#see-all-btn:hover {
+  color: rgba(0, 0, 0, 1); /* Hover rõ hơn một chút */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+
+.jetton-item {
+  position: relative;
+}
+
+.jetton-address-link {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 14px;
+  color: #999;
+  text-decoration: none;
+  font-weight: bold;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.jetton-address-link:hover {
+  opacity: 1;
+  color: #666;
+}
+.verified-badge {
+    color: #1da1f2;
+    margin-left: 1px;
+    margin-bottom: 3px;
+    font-size: 20px;
+    vertical-align: middle;
+  }
+  .warning-badge {
+  color: #ffa500; /* Màu cam cảnh báo */
+  margin-left: 1px;
+  margin-bottom: 3px;
+  font-size: 20px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 1px rgba(255, 165, 0, 0.6));
+}
+
+
+
+
+
+  #disconnect-wallet {
+  display: none;
+  padding: 8px 14px;
+  background-color: #ff4c4c;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+}
+#disconnect-wallet:hover{
+    background-color: #d32f2f;
+    transform: translate(-3px);
+  }
+
+
+
+
+
+  .mini-spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+
+
+
+
+#token-header {
+  display: none;
+}
+
+#see-all-btn {
+  display: none;
+}
+
+
+
+
+.jetton-info-popup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.jetton-info-popup-content {
+  background: white;
+  padding: 20px;
+  max-width: 500px;
+  margin: 100px auto;
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.close-popup {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 30px;
+}
+
+.jetton-info-popup-content p,
+.jetton-info-popup-content ul {
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+.jetton-info-popup-content ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.jetton-info-popup-content a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.jetton-info-popup-content a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#total-amount {
+      font-size: 22px;
+
+      color: #2e3a59;
+      text-align: center;
+    }
+
+
+
+
+
+.view-link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+.view-link a {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+
+/* Spinner đơn giản */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #4A90E2; /* màu xanh dương */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+
+
+
+
+
+
+
+
+#user-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-top: 10px; /* Cách top 90px */
+}
+
+
+  #user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    transition: border-color 0.3s ease;
+  }
+
+  #user-avatar:hover {
+    border-color: #007aff;
+  }
+
+  #user-username {
+    font-size: 16px;
+    font-weight: 600;
+    color: #222;
+    transition: color 0.3s ease;
+  }
+
+  #user-username:hover {
+    color: #007aff;
+  }
+</style>
+<body>
+  <!-- Header người dùng (avatar + username) -->
+<div id="user-header">
+  <img id="user-avatar" src="https://i.pravatar.cc/150?img=3" alt="Avatar">
+  <span id="user-username">Username</span>
+</div>
+
+
+<div id="connect-only">
+  <div id="connect-wallet"></div>
+</div>
+
+
+<div id="header-container" style="display:none; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 600px; margin-bottom: 20px; margin-top: 65px;">
+
+<h2 id="token-header" style="margin: 0;">Jettons</h2>
+  
+<!-- Thêm một div để hiển thị tổng số tiền USDT -->
+<div id="total-amount" style="font-size: 18px; font-weight: bold; display: none;"></div>
+
+
+  <button id="disconnect-wallet">Disconnect</button>
+</div>
+
+
+
+
+
+<div id="loading-spinner" style="display:none;" class="loader"></div>
+<div id="jettons-list"></div>
+<div id="zero-balance-list" style="display: none;"></div>
+<div id="see-all-btn">------- See all -------</div>
+<div id="jetton-info-popup" class="jetton-info-popup">
+  <div class="jetton-info-popup-content">
+    <button class="close-popup" onclick="document.getElementById('jetton-info-popup').style.display='none'">×</button>
+    <div id="jetton-info-container"></div>
+  </div>
+</div>
+
+
+
+<script>
+ // Tự động active tab đang mở
+const currentPage = location.pathname.split("/").pop();
+const items = document.querySelectorAll(".footer-item");
+items.forEach(item => {
+  const page = item.getAttribute("data-page");
+  if (page === currentPage) {
+    item.classList.add("active");
+  }
+});
+
+const tg = Telegram.WebApp;
+tg.ready();
+tg.BackButton.show();
+tg.BackButton.onClick(() => window.history.back());
+
+const connectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: 'https://bmweb.site/tonconnect-manifest.json',
+  buttonRootId: 'connect-wallet'
+});
+
+async function fetchJettons(walletAddress) {
+  const loadingSpinner = document.getElementById('loading-spinner');
+  const list = document.getElementById('jettons-list');
+  const zeroList = document.getElementById('zero-balance-list');
+  const seeAllBtn = document.getElementById('see-all-btn');
+  const tokenHeader = document.getElementById('token-header');
+  const totalAmountDiv = document.getElementById('total-amount');
+  const userNameDiv = document.getElementById('user-name');
+
+  loadingSpinner.style.display = 'block';
+  list.innerHTML = '';
+  zeroList.innerHTML = '';
+  zeroList.style.display = 'none';
+  seeAllBtn.style.display = 'none';
+
+  try {
+    const tonRes = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
+    const tonData = await tonRes.json();
+    const tonBalance = parseFloat(tonData.balance) / 1e9;
+
+    const userName = tonData.name;
+    if (userName && userNameDiv) {
+      userNameDiv.innerHTML = `<p><strong>👤 ${userName}</strong></p>`;
+    }
+
+    const okxRes = await fetch('https://www.okx.com/api/v5/market/ticker?instId=TON-USDT');
+    const okxData = await okxRes.json();
+    const tonPrice = parseFloat(okxData.data[0].last);
+    const tonOpen = parseFloat(okxData.data[0].open24h);
+    const tonChange = ((tonPrice - tonOpen) / tonOpen) * 100;
+
+    const tonHTML = `
+      <div class="jetton-item">
+        <img src="/logo-coin/ton.jpg" alt="TON" class="jetton-logo">
+        <div class="jetton-info">
+          <strong>TON
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" 
+                 alt="verified" width="16" class="verified-badge">
+          </strong>
+          <p>${tonBalance.toLocaleString("vi-VN", { maximumFractionDigits: 9 })} TON</p>
+          <p style="color: ${tonChange >= 0 ? 'green' : 'red'};">
+            $${tonPrice.toFixed(3)} (${tonChange.toFixed(2)}%)
+          </p>
+        </div>
+      </div>
+    `;
+    list.innerHTML += tonHTML;
+    totalAmountDiv.innerHTML = `<p>Tổng trị giá: $${(tonBalance * tonPrice).toFixed(2)}</p>`;
+
+    const response = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons`);
+    const data = await response.json();
+    loadingSpinner.style.display = 'none';
+
+    if (!data.balances || data.balances.length === 0) {
+      tokenHeader.style.display = 'none';
+      return;
+    }
+    tokenHeader.style.display = 'block';
+
+    const zeroBalanceJettons = [];
+
+    for (const jetton of data.balances) {
+      const decimals = jetton.jetton.decimals || 9;
+      const balance = parseFloat(jetton.balance) / (10 ** decimals);
+      const formattedBalance = balance.toLocaleString("vi-VN", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals > 5 ? 5 : decimals
+      });
+
+      const name = jetton.jetton.name || '';
+      const symbol = jetton.jetton.symbol || '';
+      const image = jetton.jetton.image || 'https://duccodedao.github.io/web/logo-coin/bmlogo.jpg';
+      const jettonAddress = jetton.jetton.address;
+      const isVerified = jetton.jetton.verification === "whitelist";
+      const verifiedBadge = isVerified ?
+        '<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="verified" width="16" class="verified-badge">'
+        : '';
+      const isSuspicious = !isVerified || image.includes("placeholder");
+      const warningIcon = isSuspicious ?
+        '<img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="warning" width="16" title="Token chưa xác minh hoặc đáng nghi" class="warning-badge">'
+        : '';
+
+      const itemHTML = `
+        <div class="jetton-item" onclick="fetchJettonInfo('${jettonAddress}')">
+          <img src="${image}" alt="${name}" class="jetton-logo">
+          <div class="jetton-info">
+            <strong>${name} ${verifiedBadge} ${warningIcon}</strong>
+            <p>${formattedBalance} ${symbol}</p>
+          </div>
+          <a href="https://tonviewer.com/${walletAddress}/jetton/${jettonAddress}" class="jetton-address-link" target="_blank">View</a>
+        </div>
+      `;
+
+      if (balance > 0) {
+        list.innerHTML += itemHTML;
+      } else {
+        zeroBalanceJettons.push(itemHTML);
+      }
+    }
+
+    if (zeroBalanceJettons.length > 0) {
+      seeAllBtn.style.display = 'block';
+      seeAllBtn.onclick = () => {
+        zeroList.innerHTML = zeroBalanceJettons.join('');
+        zeroList.style.display = 'block';
+        seeAllBtn.style.display = 'none';
+      };
+    }
+
+  } catch (error) {
+    loadingSpinner.style.display = 'none';
+    console.error('ERROR', error);
+  }
+}
+
+// Các function khác giữ nguyên
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchJettonInfo(jettonAddress) {
+  const jettonInfoContainer = document.getElementById('jetton-info-container');
+  document.getElementById('jetton-info-popup').style.display = 'block';
+
+  jettonInfoContainer.innerHTML = `
+    <div class="spinner"></div>
+    <p style="text-align: center; margin-top: 10px;">Loading information...</p>
+  `;
+
+  await delay(1500);
+
+  try {
+    const response = await fetch(`https://tonapi.io/v2/jettons/${jettonAddress}`);
+    const jettonData = await response.json();
+
+    if (jettonData) {
+      const name = jettonData.metadata?.name || 'Không có';
+      const symbol = jettonData.metadata?.symbol || 'Không có';
+      const description = jettonData.metadata?.description || 'Không có mô tả';
+      const verification = jettonData.verification === 'whitelist'
+        ? `<span style="color: #1877F2; font-weight: bold;">Verified <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" alt="verified" width="16" style="vertical-align: middle; margin-bottom: 3px;"></span>`
+        : `<span style="color: red; font-weight: bold;">Not verified <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="warning" width="16" style="vertical-align: middle;  margin-bottom: 3px;"></span>`;
+
+      const decimals = Number(jettonData.metadata?.decimals || 0);
+      const holders = Number(jettonData.holders_count).toLocaleString();
+      const rawSupply = BigInt(jettonData.total_supply);
+      const supply = Number(rawSupply / BigInt(10 ** decimals)).toLocaleString();
+
+      let imageUrl = jettonData.metadata?.image || '';
+      if (imageUrl.startsWith('ipfs://')) {
+        imageUrl = imageUrl.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+      }
+
+      const websites = jettonData.metadata?.websites || [];
+      let websitesHTML = '';
+      if (websites.length > 0) {
+        websitesHTML = `<p><strong>Website:</strong></p><ul>` +
+          websites.map(url => `<li><a href="${url}" target="_blank">${url}</a></li>`).join('') +
+          `</ul>`;
+      }
+
+      const socials = jettonData.metadata?.social || [];
+      let socialsHTML = '';
+      if (socials.length > 0) {
+        socialsHTML = `<p><strong>Mạng xã hội:</strong></p><ul>` +
+          socials.map(link => `<li><a href="${link}" target="_blank">${link}</a></li>`).join('') +
+          `</ul>`;
+      }
+
+      const jettonHTML = `
+        <img src="${imageUrl}" alt="${name}" style="width: 80px; height: 80px; border-radius: 10px; margin-bottom: 10px;">
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Symbol:</strong> ${symbol}</p>
+        <p><strong>Address:</strong> <a href="https://tonviewer.com/${jettonAddress}" target="_blank">Tonviewer</a></p>
+        <p><strong>Description:</strong> ${description}</p>
+        <p><strong>Holders:</strong> ${holders}</p>
+        <p><strong>Supply:</strong> ${supply}</p>
+        <p><strong>Status:</strong> ${verification}</p>
+        ${websitesHTML}
+        ${socialsHTML}
+      `;
+
+      jettonInfoContainer.innerHTML = jettonHTML;
+    }
+  } catch (error) {
+    jettonInfoContainer.innerHTML = 'ERROR';
+    console.error('ERROR', error);
+  }
+}
+
+connectUI.onStatusChange(async (wallet) => {
+  const disconnectButton = document.getElementById('disconnect-wallet');
+  const connectOnlyDiv = document.getElementById('connect-only');
+  const tokenHeader = document.getElementById('token-header');
+  const seeAllBtn = document.getElementById('see-all-btn');
+  const totalAmountDiv = document.getElementById('total-amount');
+
+  if (wallet && wallet.account) {
+    connectOnlyDiv.style.display = 'none';
+    disconnectButton.style.display = 'block';
+    tokenHeader.style.display = 'block';
+    seeAllBtn.style.display = 'block';
+    totalAmountDiv.style.display = 'none';
+
+    await fetchJettons(wallet.account.address);
+
+    disconnectButton.addEventListener('click', () => {
+      connectUI.disconnect();
+      connectOnlyDiv.style.display = 'flex';
+      disconnectButton.style.display = 'none';
+      tokenHeader.style.display = 'none';
+      seeAllBtn.style.display = 'none';
+      totalAmountDiv.style.display = 'none';
+      document.getElementById('jettons-list').innerHTML = '';
+      document.getElementById('zero-balance-list').innerHTML = '';
+      document.getElementById('user-name').innerHTML = '';
+    });
+  } else {
+    connectOnlyDiv.style.display = 'flex';
+    disconnectButton.style.display = 'none';
+    tokenHeader.style.display = 'none';
+    seeAllBtn.style.display = 'none';
+    totalAmountDiv.style.display = 'none';
+    document.getElementById('jettons-list').innerHTML = '';
+    document.getElementById('zero-balance-list').innerHTML = '';
+    document.getElementById('user-name').innerHTML = '';
+  }
+});
+
+</script>
+</body>
+</html>

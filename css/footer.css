@@ -1,0 +1,89 @@
+/* css/footer.css */
+
+/* --- Footer Styling --- */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* Gradient màu tối sang trọng */
+    background: linear-gradient(to right, #2c3e50, #1a252f);
+    color: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 75px; /* Chiều cao footer */
+    /* Bóng đổ mạnh và tối hơn */
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+    z-index: 1000;
+    padding: 0 10px;
+    /* Hiệu ứng làm mờ nền */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); /* Hỗ trợ Safari */
+
+    /* Thêm border-radius cho toàn bộ footer */
+    border-top-left-radius: 15px; /* Bo tròn góc trên bên trái */
+    border-top-right-radius: 15px; /* Bo tròn góc trên bên phải */
+    /* Bạn có thể dùng border-radius: 15px 15px 0 0; để bo tròn cả 2 góc trên */
+}
+
+.footer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    /* Màu chữ hơi mờ khi không active */
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 10px;
+    /* Bo tròn góc nhẹ cho tất cả các item */
+    border-radius: 8px;
+    /* Hiệu ứng chuyển động mượt mà */
+    transition: all 0.3s ease;
+    /* Chia đều không gian cho mỗi item */
+    flex-grow: 1;
+    /* Khoảng cách giữa các item */
+    margin: 0 5px;
+}
+
+.footer-item i {
+    font-size: 22px; /* Kích thước icon */
+    margin-bottom: 3px;
+    transition: all 0.3s ease;
+}
+
+.footer-item span {
+    margin-top: 2px;
+    margin-bottom: 15px; /* Khoảng cách giữa icon và text */
+}
+
+/* Hover state */
+.footer-item:not(.active):hover {
+    /* Nền hơi sáng khi hover */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white; /* Chữ trắng khi hover */
+    transform: translateY(-2px); /* Nhấc nhẹ lên */
+}
+
+.footer-item:not(.active):hover i {
+    color: white; /* Icon trắng khi hover */
+}
+
+/* Active state */
+.footer-item.active {
+    /* Nền sáng và nổi bật hơn khi active */
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #8aff8a; /* Màu xanh lá cây sáng nổi bật cho chữ active */
+    font-weight: 700; /* In đậm hơn */
+    transform: translateY(-5px); /* Nhấc lên rõ rệt */
+    /* Bóng đổ khi active */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    /* Bo tròn góc mạnh hơn khi active để tạo hình viên thuốc */
+    border-radius: 25px; /* Giá trị lớn hơn hoặc 50% height để bo tròn hoàn toàn */
+}
+
+.footer-item.active i {
+    color: #8aff8a; /* Màu xanh lá cây sáng cho icon active */
+    transform: scale(1.1); /* Phóng to icon một chút */
+}

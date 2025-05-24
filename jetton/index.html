@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Jettons</title>
+  <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/jetton/jetton.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/js/ton-connect-bmass.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<!-- CSS SweetAlert2 -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+<!-- JS SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+
+<div id="connect-only">
+  <div id="connect-wallet"></div>
+</div>
+<div id="header-container" style="display:none; display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 600px; margin-bottom: 20px; margin-top: 80px;">
+ 
+<div id="token-header">
+  <img id="telegram-avatar" src="" alt="Avatar">
+  <h2 id="telegram-name"></h2>
+</div>
+
+
+<span id="wallet-friendly-address" style="font-weight: bold;"></span>
+
+
+
+<!-- Thêm một div để hiển thị tổng số tiền USDT -->
+<div id="total-amount" style= "font-size: 18px; font-weight: bold;"></div>
+
+  <button id="disconnect-wallet">Disconnect</button>
+</div>
+
+
+<div id="loading-spinner" style="display:none;" class="loader"></div>
+<div id="jettons-list"></div>
+<div id="zero-balance-list" style="display: none;"></div>
+<div id="see-all-btn">------- See all -------</div>
+<div id="jetton-info-popup" class="jetton-info-popup">
+  <div class="jetton-info-popup-content">
+    <button class="close-popup" onclick="document.getElementById('jetton-info-popup').style.display='none'">×</button>
+    <div id="jetton-info-container"></div>
+  </div>
+</div>
+
+
+
+  
+
+
+
+
+<script src="/jetton/test.js"></script>
+</body>
+</html>

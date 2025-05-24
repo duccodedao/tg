@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông Tin Cá Nhân Telegram + TON Connect</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/profile/profile.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="/js/ton-connect-bmass.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+
+  <!-- Khi chưa kết nối ví -->
+  <div id="connect-only">
+    <div id="connect-wallet">
+
+    </div>
+  </div>
+
+  <!-- Nội dung chính sau khi kết nối -->
+  <div id="main-content" class="container" style="display: none; margin: 16px; margin-top: 85px;">
+    
+    <!-- Nút container -->
+    <div class="btn-container">
+
+      <div class="btn" id="disconnect">
+        <i class="fas fa-sign-out-alt"></i> Disconnect
+      </div>
+    </div>
+
+
+
+<!-- Thông tin người dùng -->
+<div class="info-container">
+
+  <div class="info-item">
+    <div class="row">
+      <div>Avatar</div>
+      <div id="avatar">
+        <img id="tg-avatar" alt="User Avatar" width="100" height="100" style="border-radius: 50%;" />
+      </div>
+    </div>
+  </div>
+
+  <div class="info-item">
+    <div class="row">
+      <div>Username</div>
+      <div class="wallet-address">
+        <span id="tg-username">Loading...</span>
+        <i class="fa-regular fa-copy" id="copy-username" style="cursor: pointer; margin-left: 8px; color: #4CAF50;"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-item">
+    <div class="row">
+      <div>Name</div>
+      <div class="wallet-address">
+        <span id="tg-name">Loading...</span>
+        <i class="fa-regular fa-copy" id="copy-name" style="cursor: pointer; margin-left: 8px; color: #4CAF50;"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-item">
+    <div class="row">
+      <div>ID</div>
+      <div class="wallet-address">
+        <span id="tg-id">Loading...</span>
+        <i class="fa-regular fa-copy" id="copy-id" style="cursor: pointer; margin-left: 8px; color: #4CAF50;"></i>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Hiển thị base64 -->
+<div class="info-item">
+  <div class="row">
+    <div>Address</div>
+    <div class="wallet-address">
+      <span id="short-address">...</span>
+      <i id="copy-base64-icon" class="fa-regular fa-copy" style="cursor: pointer; margin-left: 8px; color: #4CAF50;"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Hiển thị Friendly Address -->
+<div class="info-item">
+  <div class="row">
+    <div>Friendly</div>
+    <div class="wallet-address">
+      <span id="friendly-address">...</span>
+      <i id="copy-friendly-icon" class="fa-regular fa-copy" style="cursor: pointer; margin-left: 8px; color: #4CAF50;"></i>
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- Balance -->
+  <div class="info-item">
+    <div class="row">
+      <div>Balance</div>
+      <div id="ton-balance">Loading...</div>
+     
+    </div>
+  </div>
+
+</div>
+
+<script src="/profile/profile.js"></script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+zero-balance-list
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+
+
+.jetton-item {
+  position: relative;
+  padding-top: 25px;
+}
+
+.jetton-price {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background-color: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+
+
+
+.percent-change {
+  font-size: 14px;
+  color: #4caf50; /* Màu xanh cho phần trăm tăng */
+  font-weight: bold;
+}
+
+.percent-change.negative {
+  color: #f44336; /* Màu đỏ cho phần trăm giảm */
+}
+
+
+
+
+
+    body {
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      background: #e0e5ec;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+      padding: 20px;
+
+    }
+
+#connect-only {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+ 
+}
+
+#disconnect-wallet {
+  margin-top: 20px;
+  display: none;
+  padding: 10px 20px;
+  background-color: #ff4c4c;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+
+#disconnect-wallet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+}
+
+#disconnect-wallet:hover::before {
+  left: 125%;
+}
+
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #2e3a59;
+      text-align: center;
+    }
+
+    #jettons-list {
+      width: 100%;
+      max-width: 600px;    
+
+    }
+.jetton-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #e0e5ec;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  box-shadow: inset 2px 2px 6px #c3c8d3, inset -2px -2px 6px #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden; /* quan trọng để che phần shine vượt ra ngoài */
+}
+
+.jetton-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+  pointer-events: none; /* để không chặn click */
+}
+
+.jetton-item:hover::before {
+  left: 125%;
+}
+
+.jetton-item:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 2px 2px 8px #b5bbc6, inset -2px -2px 8px #ffffff;
+}
+
+
+    .jetton-logo {
+      width: 40px;
+      height: 40px;
+      margin-right: 16px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+      box-shadow: 2px 2px 4px #c3c8d3, -2px -2px 4px #ffffff;
+    }
+
+    .jetton-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 15px;
+      color: #2f3d59;
+    }
+
+    .jetton-info strong {
+      font-weight: 700;
+      color: #004c99;
+    }
+
+    .jetton-info p {
+      font-size: 14px;
+      color: #00796b;
+      font-weight: 600;
+      margin: 4px 0 0;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      .jetton-item {
+        padding: 14px;
+      }
+
+      .jetton-logo {
+        width: 36px;
+        height: 36px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .jetton-info {
+        font-size: 14px;
+      }
+    }
+
+    #zero-balance-list {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+#see-all-btn {
+  all: unset;
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5); /* Màu mờ */
+  margin-top: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+#see-all-btn:hover {
+  color: rgba(0, 0, 0, 1); /* Hover rõ hơn một chút */
+}
+#see-all-btn .dashes {
+  color: gray;
+}
+#see-all-btn .text {
+  margin: 0 4px;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+
+.jetton-item {
+  position: relative;
+}
+
+.jetton-address-link {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 14px;
+  color: #999;
+  text-decoration: none;
+  font-weight: bold;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.jetton-address-link:hover {
+  opacity: 1;
+  color: #666;
+}
+.verified-badge {
+    color: #1da1f2;
+    margin-left: 1px;
+    margin-bottom: 3px;
+    font-size: 20px;
+    vertical-align: middle;
+  }
+  .warning-badge {
+  color: #ffa500; /* Màu cam cảnh báo */
+  margin-left: 1px;
+  margin-bottom: 3px;
+  font-size: 20px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 1px rgba(255, 165, 0, 0.6));
+}
+
+
+
+
+
+
+
+
+#token-header {
+  display: none;
+}
+
+#see-all-btn {
+  display: none;
+}
+
+
+
+
+/* Overlay full màn hình */
+.jetton-info-popup {
+  display: none; /* Ẩn mặc định */
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+
+
+  /* Flex để căn giữa */
+display: none;
+  justify-content: center;
+  align-items: center;
+
+  /* Khi popup dài, cho phép scroll */
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Nội dung popup */
+.jetton-info-popup-content {
+  margin-top: 90px;
+  background: #fff;
+  border-radius: 20px;
+  max-width: 480px;
+  width: 100%;
+  padding: 20px 30px;
+  box-sizing: border-box;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease forwards;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Nút đóng */
+.close-popup {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f44336;
+  color: white;
+  border: none;
+  font-weight: bold;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 32px;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+.close-popup:hover {
+  background: #d32f2f;
+}
+
+/* Text và danh sách */
+.jetton-info-popup-content p,
+.jetton-info-popup-content ul {
+  margin: 12px 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.jetton-info-popup-content ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.jetton-info-popup-content a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.jetton-info-popup-content a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#total-amount {
+      font-size: 22px;
+
+      color: #2e3a59;
+      text-align: center;
+    }
+
+
+
+
+
+.view-link {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+
+.view-link a {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+
+
+
+
+
+
+
+
+
+/* Spinner đơn giản */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #4A90E2; /* màu xanh dương */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+
+
+
+
+
+
+
+#token-header {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* khoảng cách giữa avatar và tên */
+  margin: 0;
+  font-size: 20px;
+}
+
+
+
+#telegram-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: none; /* hiển thị bằng JS nếu có avatar */
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+#telegram-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+
+.jetton-logo-wrapper {
+  position: relative;
+  display: inline-block; /* để dễ căn chỉnh */
+}
+
+.jetton-network-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  background-color: white;
+
+  /* chỉnh dịch sang trái bằng translateX */
+  transform: translateX(-60%);
+  /* hoặc chỉnh margin-right âm nếu muốn */
+  /* margin-right: -3px; */
+}
+
+
+
+
+.total-asset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 65px;
+  text-align: center;
+
+}
+
+.total-asset strong {
+  font-size: 1.2rem;
+}
+
+.total-asset p {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#friendly-address-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* căn giữa ngang */
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  max-width: 280px;
+  margin: 0 auto;
+  user-select: none;
+}
+
+#friendly-address {
+  font-size: 1.2rem;
+  color: #00796b;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#copy-friendly-icon {
+  font-size: 16px;
+  color: #00796b;
+  transition: color 0.2s ease;
+}
+
+#copy-friendly-icon:hover {
+  color: #004085;
+}
+
+
+
+
+.swal2-toast-success,
+.swal2-toast-error {
+  margin-top: 90px !important; /* 👈 Cách top 90px */
+  border-radius: 12px !important;
+  box-shadow: 0 0 12px rgba(0,0,0,0.15);
+  font-weight: 600;
+}

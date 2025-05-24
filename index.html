@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BmassHD</title>
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/footer.css">
+  <script src="https://cdn.jsdelivr.net/gh/duccodedao/web@main/js/ton-connect-bmass.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="/logo-coin/bmlogo.jpg" alt="Logo">
+            <div class="logo-text">BmassHD</div>
+        </div>
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <nav class="nav" id="navbar">
+            <a href="https://t.me/bmassk3_bot/?stratapp=">Telegram Apps</a>
+            <a href="#">Browser</a>
+            <div id="user-info" class="user-info"></div>
+            <div id="tg-login-container">
+                <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="bmassk3_bot" data-size="large" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
+            </div>
+        </nav>
+    </header>
+    
+
+    
+    <div class="content">
+        <h1 id="welcome-text">Welcome to BmassHD</h1>
+        <p>Explore airdrops, notifications and your personal profile.</p>
+        <div id="ton-connect"></div>
+    </div>
+    <div id="wallet-info">
+        <div id="user-info" class="user-info"></div>
+        <div id="wallet-header">
+            <b>Address:</b> <span id="wallet-address">abcd****1234</span>
+        </div>
+        <div id="wallet-details">
+            <b>Balance:</b> <span id="wallet-balance">Not connected</span>
+            <p> <strong> </strong> <span id="wallet-usdt-value"></span></p>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+<footer>
+        <a href="/wallet/wallet2.html" class="footer-item" data-page="wallet">
+            <i class="fas fa-wallet"></i>
+            <span>Jetton</span>
+        </a>
+
+        <a href="/wallet/index.html" class="footer-item" data-page="ton">
+            <i class="fas fa-gem"></i> <span>TON</span>
+        </a>
+        <a href="/jetton/index.html" class="footer-item" data-page="jetton">
+            <i class="fas fa-coins"></i>
+            <span>Coin</span>
+
+        <a href="/profile/index.html" class="footer-item" data-page="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+</footer>
+ 
+
+    <script>
+        // Tự động active tab đang mở
+const currentPage = location.pathname.split("/").pop();
+const items = document.querySelectorAll(".footer-item");
+
+items.forEach(item => {
+  const page = item.getAttribute("data-page");
+  if (page === currentPage) {
+    item.classList.add("active");
+  }
+});
+    </script>
+
+
+
+
+    
+    <script>
+        function toggleMenu() {
+            document.getElementById("navbar").classList.toggle("active");
+        }
+        
+        function onTelegramAuth(user) {
+            var userInfo = document.getElementById("user-info");
+            var avatarUrl = user.photo_url ? user.photo_url : 'https://via.placeholder.com/30';
+            var userHtml = '<img src="' + avatarUrl + '" class="user-avatar">' + user.first_name + (user.last_name ? ' ' + user.last_name : '') + ' (@' + user.username + ')';
+            userInfo.innerHTML = userHtml;
+            userInfo.style.display = "flex";
+            document.getElementById("tg-login-container").style.display = "none";
+            
+            var userData = {
+                first_name: user.first_name,
+                last_name: user.last_name || '',
+                username: user.username,
+                photo_url: avatarUrl,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem("userData", JSON.stringify(userData));
+        }
+        
+        function checkLoginStatus() {
+            var storedData = localStorage.getItem("userData");
+            if (storedData) {
+                var userData = JSON.parse(storedData);
+                var currentTime = new Date().getTime();
+                if (currentTime - userData.timestamp < 60 * 60 * 1000) {
+                    var userInfo = document.getElementById("user-info");
+                    var userHtml = '<img src="' + userData.photo_url + '" class="user-avatar">' + userData.first_name + (userData.last_name ? ' ' + userData.last_name : '') + ' (@' + userData.username + ')';
+                    userInfo.innerHTML = userHtml;
+                    userInfo.style.display = "flex";
+                    document.getElementById("tg-login-container").style.display = "none";
+                } else {
+                    localStorage.removeItem("userData");
+                }
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", checkLoginStatus);
+
+
+
+
+
+
+        function checkLoginStatus() {
+    var storedData = localStorage.getItem("userData");
+    if (storedData) {
+        var userData = JSON.parse(storedData);
+        var currentTime = new Date().getTime();
+        if (currentTime - userData.timestamp < 60 * 60 * 1000) {
+            var userInfo = document.getElementById("user-info");
+            var userHtml = '<img src="' + userData.photo_url + '" class="user-avatar">' + userData.first_name + (userData.last_name ? ' ' + userData.last_name : '') + ' (@' + userData.username + ')';
+            userInfo.innerHTML = userHtml;
+            userInfo.style.display = "flex";
+            document.getElementById("tg-login-container").style.display = "none";
+
+            // Cập nhật tiêu đề Welcome
+            document.getElementById("welcome-text").innerText = `Welcome ${userData.first_name} ${userData.last_name} to BmassHD`;
+        } else {
+            localStorage.removeItem("userData");
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+function toggleMenu() {
+            document.getElementById("navbar").classList.toggle("active");
+        }
+        function changeLanguage() {
+            var lang = document.getElementById("language").value;
+            document.documentElement.lang = lang;
+            window.location.href = `/${lang}/index.html`;
+        }
+    </script>
+
+
+
+</body>
+<script src="/js/login-tg.js"></script>
+<script src="/js/wallet.js"></script>
+</html>

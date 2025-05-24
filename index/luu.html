@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>TON</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
+  <link rel="stylesheet" href="/css/footer.css">
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  background: #e0e5ec;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#connect-only {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.container {
+  display: none;
+  background: #e0e5ec;
+  border-radius: 20px;
+  box-shadow: 10px 10px 25px #bec4d0, -10px -10px 25px #ffffff;
+  padding: 30px;
+  max-width: 100%; /* Đảm bảo chiều rộng container có thể co giãn */
+  width: 100%; /* Đảm bảo chiều rộng luôn là 100% của màn hình */
+  text-align: center;
+  overflow-y: auto;
+  max-height: 90vh;
+  margin-top: 90px;
+  margin-bottom: 90px;
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 18px;
+  color: #2e3a59;
+}
+
+.info {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.balance {
+  font-size: 18px;
+  color: #009688;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+#wallet-address {
+  font-weight: 600;
+  color: #0077cc;
+  font-size: 20px;
+  word-break: break-word;
+}
+
+ul#transactions-list {
+  list-style: none;
+  margin-top: 20px;
+  padding: 0;
+}
+
+.transaction-item {
+  background: #e0e5ec;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: inset 2px 2px 6px #c3c8d3, inset -2px -2px 6px #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.transaction-item:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 2px 2px 8px #b5bbc6, inset -2px -2px 8px #ffffff;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #2f3d59;
+  margin-bottom: 6px;
+}
+
+.icon-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #004c99;
+}
+
+.icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.amount {
+  font-weight: 600;
+  color: #00796b;
+}
+
+.address {
+  font-size: 13px;
+  color: #444;
+  word-break: break-word;
+  padding-left: 24px;
+}
+
+.time {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+}
+
+a {
+  color: #0056b3;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+#disconnect {
+  font-size: 16px;
+  margin-left: 3px;
+  cursor: pointer;
+  color: #FFF;
+  display: none;
+  transition: transform 0.2s ease;
+
+}
+
+
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+    max-width: 92%;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .info,
+  .balance,
+
+  .row,
+  .address,
+  .time {
+    font-size: 14px;
+  }
+
+  .transaction-item {
+    padding: 14px;
+  }
+
+  .icon img {
+    width: 18px;
+    height: 18px;
+  }
+
+
+}
+.memo {
+  font-size: 13px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: max-height 0.3s ease;
+  max-height: 20px;
+  margin-bottom: 6px;
+  padding-left: 24px;
+}
+
+.memo.expanded {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-height: 300px;
+}
+
+
+
+
+    .form-send {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.form-send input,
+.form-send button {
+  width: 100%;
+  padding: 10px;
+  margin: 1px 0;
+  border-radius: 25px;
+  border: none;
+  font-size: 16px;
+  box-shadow: inset 2px 2px 5px #c3c8d3, inset -2px -2px 5px #ffffff;
+}
+
+.form-send button {
+  background: #00796b;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 3px 3px 8px #a1a1a1;
+  transition: background 0.2s ease;
+}
+
+.form-send button:hover {
+  background: #004d40;
+}
+
+    #memo-text:disabled {
+  background-color: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+    li {
+  position: relative;
+  padding-bottom: 30px; /* Chừa chỗ cho link ở dưới */
+}
+
+.tx-link-row {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+}
+
+.tx-link-row a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+}
+.tx-link-row a:hover {
+  text-decoration: underline;
+}
+
+
+
+
+
+
+
+
+
+
+.dan,
+.max-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  color: white;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  animation: popIn 0.4s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dan:hover,
+.max-btn:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
+  background: linear-gradient(135deg, #0056b3, #00a2ff);
+}
+
+@keyframes popIn {
+  0% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.input-icon {
+  position: relative;
+  margin: 10px 0;
+}
+
+.input-icon .icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 18px;
+  color: #555;
+}
+
+.input-icon input {
+  padding-left: 45px !important;
+}
+
+.input-logo {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  border-radius: 25px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+    max-width: 92%;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .info,
+  .balance,
+
+  .row,
+  .address,
+  .time,
+  .memo {
+    font-size: 16px;
+  }
+
+  .transaction-item {
+    padding: 14px;
+    padding-bottom: 6px;
+  }
+
+  .icon img {
+    width: 18px;
+    height: 18px;
+  }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 25px;
+  text-align: center;
+  width: 90%;
+  max-width: 350px;  /* Bạn có thể chỉnh sửa giá trị này nếu muốn */
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.qr-canvas {
+  margin: 10px auto;
+  width: 250px; /* Điều chỉnh kích thước QR code */
+  height: 250px; /* Điều chỉnh kích thước QR code */
+}
+
+.qr-address {
+  word-break: break-word;
+}
+
+
+/* Nút Copy */
+.copy-btn {
+  width: 100%;
+  max-width: 300px;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: #0077cc;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.copy-btn i {
+  margin-right: 8px;
+}
+
+.copy-btn:hover {
+  background-color: #005fa3;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Đảm bảo các nút được căn chỉnh đúng */
+.button-container {
+  display: flex;
+  flex-direction: column; /* Xếp các nút theo chiều dọc */
+  align-items: stretch; /* Giãn các nút theo chiều ngang */
+  width: 100%; /* Chiếm toàn bộ chiều rộng */
+  padding: 20px; /* Khoảng cách xung quanh container */
+  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến kích thước */
+}
+
+/* Các nút được giãn ngang với chiều dài tự động */
+button {
+  width: 100%; /* Chiếm hết chiều rộng */
+  max-width: 100%; /* Giới hạn chiều rộng tối đa là 100% */
+  padding: 10px;
+  text-align: center; /* Canh giữa văn bản */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  outline: none;
+  background-color: #f0f0f0;
+  border-radius: 25px;
+  margin: 10px 0; /* Khoảng cách giữa các nút */
+  cursor: pointer;
+  box-sizing: border-box; /* Đảm bảo padding không ảnh hưởng đến chiều rộng */
+}
+
+/* Khoảng cách giữa biểu tượng và văn bản trong nút */
+button i {
+  margin-right: 8px;
+}
+
+
+
+/* Nút ở hàng trên */
+#send-ton-btn {
+  margin-bottom: 20px; /* Khoảng cách giữa nút này và các nút dưới */
+}
+
+/* Các nút ở hàng dưới sẽ hiển thị theo hàng ngang */
+.button-row {
+  display: flex;
+  justify-content: space-between; /* Giãn cách đều các nút */
+  width: 100%; /* Chiếm toàn bộ chiều rộng */
+  gap: 10px; /* Khoảng cách giữa các nút */
+  flex-wrap: wrap; /* Cho phép các nút gói gọn lại khi không đủ không gian */
+}
+
+/* Đặc biệt cho các nút ở hàng dưới */
+#show-qr-btn, #disconnect {
+  flex: 1 1 45%; /* Các nút sẽ chiếm 45% chiều rộng và có thể thu nhỏ hoặc giãn nở */
+  max-width: 100%; /* Đảm bảo chiều rộng không vượt quá 100% */
+}
+
+
+
+
+    
+
+#list {
+  min-height: 100px; /* đảm bảo có đủ không gian để căn giữa */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #666;
+  font-size: 16px;
+  gap: 10px;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
+
+
+
+
+.amount {
+  font-weight: bold;
+}
+
+.amount.red {
+  color: red;
+}
+
+.amount.green {
+  color: green;
+}
+
+.amount.black {
+  color: black;
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="connect-only">
+    <div id="connect-wallet"></div>
+  </div>
+
+
+  <div class="container" id="main-content">
+    <p class="info">
+      
+      <span id="wallet-address" data-full-address=""></span>
+      
+
+    </p>
+    <p id="wallet-balance" class="balance">Loading...</p>
+    <div class="form-send">
+      <h2>Sent TON</h2>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Ô Address có nút Dán -->
+<div class="input-icon">
+  <span class="icon">📬</span>
+  <input type="text" id="to-address" placeholder="Address">
+  <span class="dan" onclick="pasteFromClipboard()">
+    <i class="fa-solid fa-paste"></i> Dán
+  </span>
+</div>
+
+<!-- Ô Amount có nút Max -->
+<div class="input-icon">
+  <img src="/logo-coin/ton.jpg" alt="TON Logo" class="input-logo">
+  <input type="number" id="ton-amount" placeholder="Amount" step="0.01" min="0">
+  <span class="max-btn" onclick="setMaxTON()">
+    <i class="fa-solid fa-arrow-up-right-dots"></i> Max
+  </span>
+</div>
+
+
+      
+
+      <div class="input-icon">
+        <span class="icon">📝</span>
+        <input type="text" id="memo-text" placeholder="Memo" disabled>
+      </div>
+    
+      
+
+      <div class="button-container">
+        <button id="send-ton-btn"><i class="fas fa-paper-plane"></i> Sent Transaction</button>
+        <div class="button-row">
+          <button id="show-qr-btn"><i class="fas fa-wallet"></i> Deposit TON</button>
+          <button id="disconnect"><i class="fas fa-sign-out-alt"></i> Disconnect</button>
+        </div>
+      </div>
+      
+      
+    </div>
+    
+    <ul id="transactions-list"></ul>
+</div>
+
+
+
+
+
+
+<div id="qr-modal" class="modal">
+  <div class="modal-content">
+    <span id="close-qr" class="close-btn">✖</span>
+
+    <canvas id="qr-canvas" class="qr-canvas"></canvas>
+    <p id="qr-address" class="qr-address">Địa chỉ ví: <span id="address">0x1234567890abcdef</span></p>
+    <button id="copy-btn" onclick="copyAddress()" class="copy-btn">Copy Address</button>
+  </div>
+</div>
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<script>
+const qrBtn = document.getElementById('show-qr-btn');
+const qrModal = document.getElementById('qr-modal');
+const closeQr = document.getElementById('close-qr');
+const qrCanvas = document.getElementById('qr-canvas');
+const qrAddress = document.getElementById('qr-address');
+const copyBtn = document.getElementById('copy-btn'); // Lấy nút Copy Address
+
+qrBtn.addEventListener('click', () => {
+  // Lấy địa chỉ đầy đủ từ data-full-address
+  const fullAddress = document.getElementById('wallet-address').getAttribute("data-full-address");
+  qrAddress.innerText = fullAddress;
+
+  // Tạo mã QR từ địa chỉ đầy đủ
+  QRCode.toCanvas(qrCanvas, fullAddress, { width: 300 }, function (error) {
+    if (error) console.error(error);
+  });
+
+  qrModal.style.display = 'flex';
+});
+
+closeQr.addEventListener('click', () => {
+  qrModal.style.display = 'none';
+});
+
+function copyAddress() {
+  // Lấy địa chỉ đầy đủ từ data-full-address
+  const fullAddress = document.getElementById("wallet-address").getAttribute("data-full-address");
+  if (fullAddress) {
+    // Sao chép địa chỉ đầy đủ vào clipboard
+    navigator.clipboard.writeText(fullAddress).then(() => {
+      // Thay đổi văn bản của nút thành "Copied!"
+      copyBtn.innerText = "Copied!";
+      
+      // Sau 2 giây, thay đổi lại văn bản của nút về "Copy Address"
+      setTimeout(() => {
+        copyBtn.innerText = "Copy Address";
+      }, 2000);
+    }).catch((err) => {
+      console.error("Không thể copy:", err);
+    });
+  }
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+
+  <footer>
+    <a href="/index/wallet_new.html" class="footer-item" data-page="wallet_new.html">
+      <i class="fas fa-wallet"></i>
+      <span>Wallet</span>
+    </a>
+    <a href="/index/jetton.html" class="footer-item" data-page="jetton.html">
+      <i class="fas fa-coins"></i> <!-- Biểu tượng Coins cho Jetton -->
+      <span>Jetton</span>
+    </a>
+    <a href="/index/main.html" class="footer-item" data-page="main.html">
+      <i class="fas fa-th"></i>
+      <span>App</span>
+    </a>
+  
+    <!-- Thêm Profile thay vì Home và Shop -->
+    <a href="/index/profile.html" class="footer-item" data-page="profile.html">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+  
+  </footer>
+
+
+
+
+
+
+
+
+  <script>
+    // Tự động active tab đang mở
+const currentPage = location.pathname.split("/").pop();
+const items = document.querySelectorAll(".footer-item");
+
+items.forEach(item => {
+const page = item.getAttribute("data-page");
+if (page === currentPage) {
+item.classList.add("active");
+}
+});
+</script>
+
+  <script>
+const tg = window.Telegram.WebApp;
+tg.ready();
+
+let balanceTon = 0; // Khai báo biến toàn cục để lưu số dư
+
+const connector = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: "https://bmasshd.click/tonconnect-manifest.json",
+  buttonRootId: "connect-wallet"
+});
+
+connector.onStatusChange(async (wallet) => {
+  if (wallet) {
+    const rawAddress = wallet.account.address;
+
+    document.getElementById("connect-only").style.display = "none";
+    document.getElementById("main-content").style.display = "block";
+
+    try {
+      const res = await fetch(`https://toncenter.com/api/v2/getExtendedAddressInformation?address=${rawAddress}`);
+      const data = await res.json();
+
+      if (data.ok && data.result) {
+        const accountAddress = data.result.address.account_address;
+        const balanceNanoTON = parseInt(data.result.balance);
+        balanceTon = safeParseNanoTON(balanceNanoTON); // Gán vào biến toàn cục
+
+        document.getElementById("wallet-balance").textContent = `Balance: ${truncateDecimal(balanceTon)} TON`;
+        document.getElementById("ton-amount").setAttribute("max", balanceTon);
+
+        const shortAddress = accountAddress.slice(0, 8) + "..." + accountAddress.slice(-8);
+        const walletAddressEl = document.getElementById("wallet-address");
+        walletAddressEl.textContent = shortAddress;
+        walletAddressEl.setAttribute("data-full-address", accountAddress);
+
+        document.getElementById("disconnect").style.display = 'inline-block';
+
+        fetchTransactionHistory(rawAddress);
+      }
+    } catch (err) {
+      console.error("Lỗi khi tải thông tin:", err);
+    }
+  } else {
+    document.getElementById("wallet-address").textContent = "...";
+    document.getElementById("wallet-address").setAttribute("data-full-address", "");
+    document.getElementById("wallet-balance").textContent = "Số dư: ... TON";
+    document.getElementById("disconnect").style.display = 'none';
+    document.getElementById("main-content").style.display = "none";
+    document.getElementById("connect-only").style.display = "flex";
+  }
+});
+
+
+
+// 👉 Gán full số dư vào input khi nhấn MAX
+function setMaxTON() {
+  if (balanceTon > 0) {
+    document.getElementById("ton-amount").value = balanceTon;
+  }
+}
+
+
+
+
+
+
+document.getElementById("disconnect").addEventListener("click", () => {
+  connector.disconnect();
+});
+
+// Hàm để cắt bớt chữ số thập phân
+function truncateDecimal(number) {
+  return number % 1 !== 0 ? number.toFixed(9).replace(/0+$/, '').replace(/\.$/, '') : number.toFixed(0);
+}
+
+// Hàm để chuyển nanoTON sang TON
+function safeParseNanoTON(value) {
+  if (!value || isNaN(value)) return 0; // Kiểm tra giá trị hợp lệ
+  return value / 1e9; // Chuyển từ nanoTON (1e9 nanoTON = 1 TON)
+}
+
+function base64ToHex(base64) {
+  const raw = atob(base64.replace(/-/g, '+').replace(/\_/g, '/'));
+  let result = '';
+  for (let i = 0; i < raw.length; i++) {
+    result += raw.charCodeAt(i).toString(16).padStart(2, '0');
+  }
+  return result;
+}
+
+function truncateBase64(addr) {
+  return addr.length > 12 ? addr.slice(0, 4) + "…" + addr.slice(-4) : addr;
+}
+
+function toggleMemo(el) {
+  el.classList.toggle("expanded");
+}
+
+async function fetchTransactionHistory(walletAddress) {
+  try {
+    const response = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${walletAddress}&limit=40&to_lt=0&archival=false`);
+    const data = await response.json();
+    const list = document.getElementById("transactions-list");
+    list.innerHTML = "";
+
+    if (data && data.result && data.result.length > 0) {
+      for (const tx of data.result) {
+        const inMsg = tx.in_msg;
+        const outMsgs = tx.out_msgs || [];
+
+        const isReceived = inMsg && parseInt(inMsg.value) > 0;
+        const isSent = outMsgs.length > 0 && parseInt(outMsgs[0].value) > 0;
+
+        const fromAddress = isReceived ? inMsg.source : (isSent ? walletAddress : '');
+        const toAddress = isSent ? outMsgs[0].destination : (isReceived ? walletAddress : '');
+
+        const amountRaw = isReceived ? inMsg.value : (isSent ? outMsgs[0].value : "0");
+        const amountTon = safeParseNanoTON(amountRaw); // Chuyển đổi số tiền từ nanoTON sang TON
+
+        const time = new Date(tx.utime * 1000).toLocaleString(); // Chuyển đổi thời gian UTC sang định dạng người dùng
+        const label = isReceived ? '' : (isSent ? '' : 'Unknown');
+        const sign = isReceived ? '+ ' : (isSent ? '- ' : '');
+        const iconPath = isReceived ? '/logo-coin/nhan.png' : (isSent ? '/logo-coin/gui.png' : '/logo-coin/loi.png');
+
+        const memo = isReceived
+          ? inMsg.message || 'No Memo/Comment'
+          : (isSent ? outMsgs[0].message || 'No Memo/Comment' : 'Error');
+
+        const txBase64 = tx.transaction_id?.hash || '';
+        const txHex = base64ToHex(txBase64);
+        const txLink = `https://tonviewer.com/transaction/${txHex}`;
+
+        let labelText = '';
+        if (isSent && toAddress) {
+          labelText = `To: ${truncateBase64(toAddress)}`;
+        } else if (isReceived && fromAddress) {
+          labelText = `From: ${truncateBase64(fromAddress)}`;
+        } else {
+          labelText = label; // fallback
+        }
+
+        const li = document.createElement("li");
+        li.className = "transaction-item";
+        
+        // Determine color for the amount
+        const amountColor = isSent ? "red" : (isReceived ? "green" : "black"); // red for sent, green for received
+        
+        li.innerHTML = `
+          <div class="row">
+            <div class="icon-label">
+              <span class="icon"><img src="${iconPath}" alt="icon"></span>
+              <span>${labelText}</span>
+            </div>
+            <div class="amount" style="color: ${amountColor};">${sign}${truncateDecimal(amountTon)} TON</div>
+          </div>
+          <div class="row justify-between">
+            <div class="address" title="${txHex}">
+              <a href="${txLink}" target="_blank">🔎 Tonviewer</a>
+            </div>
+            <div class="time">${time}</div>
+          </div>
+          <div class="row justify-between">
+            <div class="memo" onclick="toggleMemo(this)">${memo}</div>
+          </div>
+        `;
+
+
+
+
+
+
+
+        list.appendChild(li);
+      }
+    } else {
+      list.innerHTML = `
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <div>Đang tải giao dịch...</div>
+  </div>
+`;
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy lịch sử giao dịch:", error);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+// Hàm mở rộng hoặc thu gọn memo
+function toggleMemo(element) {
+  element.classList.toggle("expanded");
+}
+  </script>
+
+
+
+<script>
+  document.getElementById("send-ton-btn").addEventListener("click", async () => {
+    const toAddress = document.getElementById("to-address").value.trim();
+    const amountTON = parseFloat(document.getElementById("ton-amount").value);
+    const memo = document.getElementById("memo-text").value.trim();
+  
+    const maxAmount = parseFloat(document.getElementById("ton-amount").getAttribute("max"));
+  
+    if (!toAddress || isNaN(amountTON) || amountTON <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        html: '<strong>Please enter a valid address and amount.</strong>',
+        position: 'top-right', // Popup hiển thị ở góc phải trên
+        toast: true, // Hiển thị dưới dạng toast
+        timer: 3000, // Tự động đóng sau 3 giây
+        showConfirmButton: false, // Không hiển thị nút xác nhận
+        padding: '10px', // Padding cho thông báo
+        customClass: {
+          popup: 'swal-popup-custom' // Thêm lớp tùy chỉnh cho popup
+        }
+      });
+      return;
+    }
+  
+    if (amountTON > maxAmount) {
+      Swal.fire({
+        icon: 'error',
+        html: `You can only send up to <strong>${truncateDecimal(maxAmount)}</strong> TON.`,
+        position: 'top-right', // Popup hiển thị ở góc phải trên
+        toast: true, // Hiển thị dưới dạng toast
+        timer: 3000, // Tự động đóng sau 3 giây
+        showConfirmButton: false, // Không hiển thị nút xác nhận
+        padding: '10px', // Padding cho thông báo
+        customClass: {
+          popup: 'swal-popup-custom' // Thêm lớp tùy chỉnh cho popup
+        }
+      });
+      return;
+    }
+  
+    try {
+      const amountNanoTON = BigInt(amountTON * 1e9);
+  
+      const tx = {
+        validUntil: Math.floor(Date.now() / 1000) + 60,
+        messages: [{
+          address: toAddress,
+          amount: amountNanoTON.toString(),
+          payload: memo ? TON_CONNECT_UI.textToPayload(memo) : undefined
+        }]
+      };
+  
+      const result = await connector.sendTransaction(tx);
+
+      Swal.fire({
+        icon: 'success',
+        html: `You have successfully sent <strong>${truncateDecimal(amountTON)}</strong> TON<br>to address <strong>${toAddress}</strong>.`,
+        position: 'top-right', // Popup hiển thị ở góc phải trên
+        toast: true, // Hiển thị dưới dạng toast
+        timer: 3000, // Tự động đóng sau 3 giây
+        showConfirmButton: false, // Không hiển thị nút xác nhận
+        padding: '10px', // Padding cho thông báo
+        customClass: {
+          popup: 'swal-popup-custom' // Thêm lớp tùy chỉnh cho popup
+        }
+      });
+
+      console.log("Result:", result);
+    } catch (err) {
+      console.error("Error while sending TON:", err);
+      Swal.fire({
+        icon: 'error',
+        html: `<strong>Unknown error</strong>`,
+        position: 'top-right', // Popup hiển thị ở góc phải trên
+        toast: true, // Hiển thị dưới dạng toast
+        timer: 3000, // Tự động đóng sau 3 giây
+        showConfirmButton: false, // Không hiển thị nút xác nhận
+        padding: '10px', // Padding cho thông báo
+        customClass: {
+          popup: 'swal-popup-custom' // Thêm lớp tùy chỉnh cho popup
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  .swal-popup-custom {
+    top: 90px !important; /* Điều chỉnh khoảng cách từ trên xuống */
+    border-radius: 25px;
+  }
+</style>
+
+
+
+
+<script>
+  async function pasteFromClipboard() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        document.getElementById("to-address").value = text.trim();
+      } else {
+        alert("Không tìm thấy nội dung nào trong clipboard.");
+      }
+    } catch (err) {
+      alert("Trình duyệt không cho phép truy cập clipboard.\nHãy thử dán thủ công: Ctrl + V.");
+    }
+  }
+</script>
+
+
+
+  
+</body>
+</html>

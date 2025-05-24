@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Verify Toggle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .admin-container {
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .verify-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        #toggle-status {
+            font-size: 18px;
+            margin-left: 10px;
+        }
+
+        #apply-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #apply-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h1>Admin Panel</h1>
+        <div class="verify-toggle-container">
+            <label class="switch">
+                <input type="checkbox" id="verify-toggle">
+                <span class="slider"></span>
+            </label>
+            <span id="toggle-status">Unverified</span>
+        </div>
+        <button id="apply-btn">Apply</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const verifyToggle = document.getElementById('verify-toggle');
+            const toggleStatus = document.getElementById('toggle-status');
+            const applyBtn = document.getElementById('apply-btn');
+
+            // Lấy trạng thái từ localStorage nếu có
+            const isVerified = localStorage.getItem('isVerified') === 'true';
+            
+            // Thiết lập trạng thái công tắc khi load trang
+            verifyToggle.checked = isVerified;
+            toggleStatus.textContent = isVerified ? 'Verified' : 'Unverified';
+
+            // Xử lý sự kiện thay đổi trạng thái công tắc
+            verifyToggle.addEventListener('change', () => {
+                if (verifyToggle.checked) {
+                    toggleStatus.textContent = 'Verified';
+                } else {
+                    toggleStatus.textContent = 'Unverified';
+                }
+            });
+
+            // Xử lý nút Apply
+            applyBtn.addEventListener('click', () => {
+                if (verifyToggle.checked) {
+                    localStorage.setItem('isVerified', 'true');
+                    alert('User is now verified.');
+                } else {
+                    localStorage.setItem('isVerified', 'false');
+                    alert('User is now unverified.');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

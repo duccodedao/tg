@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini App Telegram</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script src="/js/ton-connect-bmass.js"></script>
+  <link rel="stylesheet" href="/css/footer.css" />
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+      background: #e0e5ec;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+      padding: 20px;
+
+    }
+.dark-mode {
+  background: #222;
+  color: #fff;
+}
+.dark-mode .container {
+  background: #333;
+}
+.dark-mode .profile-info h2 {
+  color: #fff;
+}
+
+
+    .container {
+      max-width: 400px;
+      margin: 80px auto 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: background 0.3s;
+    }
+
+.centered-title {
+  text-align: center;
+}
+
+
+    .dark-mode .container {
+      background: #333;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+    }
+    .profile-left {
+      display: flex;
+      align-items: center;
+    }
+    .profile img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid #007bff;
+    }
+    .profile-info {
+      margin-left: 15px;
+      text-align: left;
+    }
+    .profile-info h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 3px;
+    }
+
+    .profile-info p {
+      font-size: 14px;
+      color: #666;
+    }
+    .dark-mode .profile-info h2 {
+      color: #fff;
+    }
+    .dark-mode .profile-info p {
+      color: #ccc;
+    }
+
+    .toggle-mode {
+      cursor: pointer;
+      font-size: 24px;
+      padding: 10px;
+      transition: color 0.3s;
+    }
+    .dark-mode .toggle-mode {
+      color: yellow;
+    }
+
+    .app-menu {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+.app {
+  position: relative; /* Cần để ::before định vị chính xác */
+  overflow: hidden;   /* Đảm bảo ::before không tràn ra ngoài */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.app:hover {
+  transform: scale(1.05);
+}
+
+.app::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+  z-index: 1;
+}
+
+.app:hover::before {
+  left: 125%;
+}
+
+.app * {
+  position: relative;
+  z-index: 2;
+}
+
+
+
+
+
+
+
+
+
+    .dark-mode .app {
+      background: #444;
+    }
+    .app img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 5px;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#connect-only {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+ 
+}
+    #wallet-address {
+      font-family: monospace;
+      font-size: 13px;
+      color: #555;
+      user-select: all;
+      cursor: pointer;
+      margin-top: 5px;
+      display:none;
+    }
+    .dark-mode #wallet-address {
+      color: #ccc;
+    }
+    #friendly-address {
+      margin-top: 5px;
+      color: red;
+    }
+   .custom-toast {
+  border-radius: 25px !important;
+}
+ 
+  </style>
+</head>
+<body>
+  <div id="connect-only">
+    <div id="connect-wallet"></div>
+  </div>
+
+  <div id="main-content" style="display: none;">
+    <div class="container">
+      <div class="profile">
+        <div class="profile-left">
+          <img src="/logo-coin/ton.jpg" id="avatar" alt="Avatar" />
+          <div class="profile-info">
+            <h2 id="name">Tên Người Dùng</h2>
+            <p id="username">@username</p>
+            <p id="wallet-address" title="test">Đang tải địa chỉ ví...</p>
+            <p id="friendly-address" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            Loading...
+              
+            </p>
+          </div>
+        </div>
+        <div class="toggle-mode" onclick="toggleDarkMode()">🌙
+ 
+    </div>
+      </div>
+
+
+      <h3 class="centered-title">Vip 2</h3>
+      <div class="app-menu">
+        <div class="app" onclick="openApp('https://example.com/app1')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 1</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app2')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 2</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app3')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 3</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app4')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 4</span>
+        </div>
+      </div>
+
+
+
+
+
+
+      <h3 class="centered-title">Vip 2</h3>
+      <div class="app-menu">
+        <div class="app" onclick="openApp('https://example.com/app1')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 1</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app2')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 2</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app3')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 3</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app4')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 4</span>
+        </div>
+      </div>
+      <div class="app-menu">
+        <div class="app" onclick="openApp('https://example.com/app1')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 1</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app2')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 2</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app3')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 3</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app4')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 4</span>
+        </div>
+      </div>
+      <div class="app-menu">
+        <div class="app" onclick="openApp('https://example.com/app1')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 1</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app2')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 2</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app3')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 3</span>
+        </div>
+        <div class="app" onclick="openApp('https://example.com/app4')">
+          <img src="/logo-coin/1.jpg" />
+          <span>App 4</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    const currentPage = location.pathname.split("/").pop();
+    const items = document.querySelectorAll(".footer-item");
+    items.forEach(item => {
+      const page = item.getAttribute("data-page");
+      if (page === currentPage) {
+        item.classList.add("active");
+      }
+    });
+
+    let tg = window.Telegram?.WebApp;
+
+    function loadUserData() {
+      if (!tg) return;
+      tg.ready();
+      let user = tg.initDataUnsafe?.user;
+      if (user) {
+        document.getElementById("name").innerText = user.first_name + (user.last_name ? " " + user.last_name : "");
+        document.getElementById("username").innerText = user.username ? "@" + user.username : "Không có username";
+        document.getElementById("avatar").src = user.photo_url || "/logo-coin/bmweb.jpg";
+      }
+    }
+    window.onload = loadUserData;
+
+    function openApp(url) {
+      window.open(url, "_blank");
+    }
+
+
+  // Gọi khi người dùng bấm nút chuyển chế độ
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+
+    // Lưu trạng thái vào localStorage
+    if (document.body.classList.contains("dark-mode")) {
+      localStorage.setItem("dark-mode", "enabled");
+    } else {
+      localStorage.setItem("dark-mode", "disabled");
+    }
+  }
+
+  // Khi trang tải lại, khôi phục trạng thái từ localStorage
+  window.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("dark-mode") === "enabled") {
+      document.body.classList.add("dark-mode");
+    }
+  });
+
+
+    const connector = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://bmweb.site/tonconnect-manifest.json",
+      buttonRootId: "connect-wallet",
+    });
+
+    connector.onStatusChange(async (wallet) => {
+      if (wallet) {
+        const walletAddress = wallet.account.address;
+        document.getElementById("connect-only").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+
+        const walletAddressEl = document.getElementById("wallet-address");
+        walletAddressEl.textContent = walletAddress;
+        walletAddressEl.onclick = () => {
+          navigator.clipboard.writeText(walletAddress)
+            .then(() => alert("Đã sao chép địa chỉ ví!"))
+            .catch(() => alert("Sao chép thất bại."));
+        };
+
+        await loadFriendlyAddress(walletAddress);
+      } else {
+        document.getElementById("connect-only").style.display = "flex";
+        document.getElementById("main-content").style.display = "none";
+        document.getElementById("wallet-address").textContent = "Đang tải địa chỉ ví...";
+        document.getElementById("friendly-address").textContent = "Đang tải địa chỉ...";
+      }
+    });
+
+async function loadFriendlyAddress(walletAddress) {
+  try {
+    const res = await fetch(`https://toncenter.com/api/v2/detectAddress?address=${walletAddress}`);
+    const detectData = await res.json();
+
+    if (detectData.ok && detectData.result) {
+      const friendlyAddr = detectData.result.non_bounceable.b64url;
+      const shortFriendly = `${friendlyAddr.slice(0, 5)}...${friendlyAddr.slice(-5)}`;
+
+      const friendlyEl = document.getElementById("friendly-address");
+      friendlyEl.textContent = shortFriendly;
+      friendlyEl.title = friendlyAddr;
+      friendlyEl.style.cursor = 'pointer';
+
+      friendlyEl.onclick = () => {
+        navigator.clipboard.writeText(friendlyAddr)
+          .then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Đã sao chép địa chỉ friendly!',
+              timer: 1500,
+              showConfirmButton: false,
+              toast: true,
+              position: 'top',
+              customClass: {
+                popup: 'custom-toast'
+              },
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.style.marginTop = '80px';
+              }
+            });
+          })
+          .catch(() => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Sao chép thất bại.',
+              timer: 1500,
+              showConfirmButton: false,
+              toast: true,
+              position: 'top',
+              customClass: {
+                popup: 'custom-toast'
+              },
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.style.marginTop = '80px';
+              }
+            });
+          });
+      };
+
+      const iconEl = document.getElementById("copy-friendly-icon");
+      if (iconEl) iconEl.onclick = friendlyEl.onclick;
+    } else {
+      document.getElementById("friendly-address").textContent = "Không thể lấy địa chỉ friendly.";
+    }
+  } catch (e) {
+    console.error("Lỗi khi gọi API detectAddress:", e);
+    document.getElementById("friendly-address").textContent = "Lỗi khi gọi API.";
+  }
+}
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>
