@@ -957,14 +957,10 @@ function resetWalletUI() {
 
 
 
-// const tg = window.Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.ready();
-// Nút back luôn luôn bật
-    tg.BackButton.show();
 
-    // Khi bấm vào nút back của Telegram
-    tg.BackButton.onClick(() => {
-      window.history.back(); // Quay lại trang trước khi người dùng mở trang này
-    })
-
-
+tg.BackButton.show();
+tg.BackButton.onClick(() => {
+    window.history.back();
+});
