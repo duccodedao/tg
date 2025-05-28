@@ -787,13 +787,25 @@ function formatTON(nanoTonAmount, decimals = 5) { // Thêm tham số decimals
     return (Number(nanoTonAmount) / 10**9).toFixed(decimals) + ' TON';
 }
 
-// Function to format Jetton balance
+// Function to format Jetton balance with thousands separator and remove trailing zeros
 function formatJettonBalance(balance, decimals) {
     if (balance === undefined || balance === null) {
         return 'N/A';
     }
     const divisor = 10**decimals;
-    return (Number(balance) / divisor).toFixed(Math.min(decimals, 5)); // Giới hạn 5 thập phân cho hiển thị
+    const numberValue = (Number(balance) / divisor);
+    
+    // Sử dụng toLocaleString để thêm dấu chấm phân cách hàng nghìn
+    // và điều khiển số lượng chữ số thập phân.
+    // Dùng 'en-US' locale để có dấu chấm là phân cách hàng nghìn.
+    const formatted = numberValue.toLocaleString('en-US', {
+        minimumFractionDigits: 0, // Đảm bảo không có số thập phân nếu là số nguyên
+        maximumFractionDigits: Math.min(decimals, 5) // Giới hạn tối đa 5 số thập phân
+    });
+
+    // Loại bỏ các số 0 thừa ở cuối nếu có, và cả dấu thập phân nếu số trở thành số nguyên
+    // Ví dụ: 1,250.00 -> 1,250; 0.25000 -> 0.25
+    return formatted.replace(/(\.0+)$|(\.\d*?[1-9])0+$/, '$2');
 }
 
 // --- TonConnect Event Listeners ---
@@ -893,14 +905,16 @@ async function fetchAccountData(address) {
     }
 
     try {
-        // 2. Fetch Jetton Balances (unchanged)
+        // 2. Fetch Jetton Balances (unchanged - đã được điều chỉnh trong formatJettonBalance)
         const jettons = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}/jettons?currencies=usdt`);
         if (jettons.balances && jettons.balances.length > 0) {
             jettonsOutput.innerHTML = jettons.balances.map(jettonBalance => {
                 const jettonDecimals = jettonBalance.jetton?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                const formattedBalance = parseFloat(formatJettonBalance(jettonBalance.balance, jettonDecimals));
+                const formattedBalance = formatJettonBalance(jettonBalance.balance, jettonDecimals);
                 const priceUSDT = jettonBalance.price?.prices?.USDT;
-                const valueUSDT = priceUSDT ? (formattedBalance * priceUSDT).toFixed(2) : 'N/A';
+                // Để tính toán giá trị USDT, chúng ta cần loại bỏ dấu chấm phân cách hàng nghìn trước
+                const numericBalance = parseFloat(formattedBalance.replace(/\./g, '').replace(/,/g, '')); // Xử lý cả dấu phẩy nếu có
+                const valueUSDT = priceUSDT ? (numericBalance * priceUSDT).toFixed(2) : 'N/A';
                 const diff24h = jettonBalance.price?.diff_24h?.USDT;
                 const diff24hText = diff24h ? `${(diff24h * 100).toFixed(2)}%` : 'N/A';
 
@@ -943,11 +957,23 @@ async function fetchAccountData(address) {
                 const transactionHash = event.event_id;
                 const linkToTonviewer = `https://tonviewer.com/event/${transactionHash}`;
 
+                // Helper function to format numbers with thousands separator and remove trailing zeros
+                const formatEventAmount = (num, decimals = 5) => {
+                    if (isNaN(num) || num === null) return 'N/A';
+                    const formatted = num.toLocaleString('en-US', {
+                        minimumFractionDigits: 0, // Đảm bảo không có số thập phân nếu là số nguyên
+                        maximumFractionDigits: decimals // Sử dụng số thập phân tối đa được cung cấp
+                    });
+                    // Loại bỏ các số 0 thừa ở cuối và cả dấu thập phân nếu số là số nguyên
+                    return formatted.replace(/(\.0+)$|(\.\d*?[1-9])0+$/, '$2');
+                };
+
                 if (action) {
                     if (action.type === 'TonTransfer' && action.TonTransfer) {
                         senderAddress = action.TonTransfer.sender?.address || 'Unknown';
                         recipientAddress = action.TonTransfer.recipient?.address || 'Unknown';
-                        amountDisplay = `${(action.TonTransfer.amount / 1e9).toFixed(5)} TON`;
+                        // Sử dụng formatEventAmount cho TON
+                        amountDisplay = `${formatEventAmount(action.TonTransfer.amount / 1e9)} TON`;
                         comment = action.TonTransfer.comment || comment;
                         // Sử dụng ảnh của TON cố định
                         tokenImage = '/logo-coin/ton.jpg'; // Đường dẫn ảnh cục bộ của bạn
@@ -958,13 +984,14 @@ async function fetchAccountData(address) {
                         senderAddress = action.JettonTransfer.sender?.address || 'Unknown';
                         recipientAddress = action.JettonTransfer.recipient?.address || 'Unknown';
                         const jettonDecimals = action.JettonTransfer.jetton_info?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                        amountDisplay = `${(action.JettonTransfer.amount / (10**jettonDecimals)).toFixed(Math.min(jettonDecimals, 5))} ${action.JettonTransfer.jetton_info?.symbol || 'Jetton'}`;
+                        // Sử dụng formatEventAmount cho Jetton
+                        amountDisplay = `${formatEventAmount(action.JettonTransfer.amount / (10**jettonDecimals), Math.min(jettonDecimals, 5))} ${action.JettonTransfer.jetton_info?.symbol || 'Jetton'}`;
                         
                         // Lấy ảnh từ JettonTransfer.jetton.image trước
                         // Sau đó, nếu không có, thử lấy từ simple_preview.value_image
-                        tokenImage = action.JettonTransfer.jetton?.image // Corrected path based on your JSON example
-                                   || action.simple_preview?.value_image 
-                                   || 'https://via.placeholder.com/40'; // Fallback nếu không có ảnh
+                        tokenImage = action.JettonTransfer.jetton?.image 
+                                       || action.simple_preview?.value_image 
+                                       || 'https://via.placeholder.com/40'; // Fallback nếu không có ảnh
 
                         comment = action.JettonTransfer.comment || comment;
                         eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
@@ -982,11 +1009,11 @@ async function fetchAccountData(address) {
 
                         if (swap.jetton_master_in) {
                             const decimalsIn = swap.jetton_master_in.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                            amountIn = (Number(swap.amount_in) / (10**decimalsIn)).toFixed(Math.min(decimalsIn, 5));
+                            amountIn = formatEventAmount(Number(swap.amount_in) / (10**decimalsIn), Math.min(decimalsIn, 5));
                             symbolIn = swap.jetton_master_in.symbol || 'JTN';
                             imageIn = swap.jetton_master_in.image || 'https://via.placeholder.com/40';
                         } else if (swap.ton_in) {
-                            amountIn = (Number(swap.ton_in) / 1e9).toFixed(5);
+                            amountIn = formatEventAmount(Number(swap.ton_in) / 1e9);
                             symbolIn = 'TON';
                             imageIn = '/logo-coin/ton.jpg'; // Sử dụng ảnh TON cục bộ cho TON in
                         }
@@ -997,11 +1024,11 @@ async function fetchAccountData(address) {
 
                         if (swap.jetton_master_out) {
                             const decimalsOut = swap.jetton_master_out.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                            amountOut = (Number(swap.amount_out) / (10**decimalsOut)).toFixed(Math.min(decimalsOut, 5));
+                            amountOut = formatEventAmount(Number(swap.amount_out) / (10**decimalsOut), Math.min(decimalsOut, 5));
                             symbolOut = swap.jetton_master_out.symbol || 'JTN';
                             imageOut = swap.jetton_master_out.image || 'https://via.placeholder.com/40';
                         } else if (swap.ton_out) {
-                            amountOut = (Number(swap.ton_out) / 1e9).toFixed(5);
+                            amountOut = formatEventAmount(Number(swap.ton_out) / 1e9);
                             symbolOut = 'TON';
                             imageOut = '/logo-coin/ton.jpg'; // Sử dụng ảnh TON cục bộ cho TON out
                         }
@@ -1011,7 +1038,6 @@ async function fetchAccountData(address) {
                         tokenImage = imageOut; 
                         
                         amountDisplay = `
-
                             <span class="amount-swap">
                                  <img src="${imageIn}" alt="${symbolIn}" class="swap-token-image"> ${amountIn} ${symbolIn}
                                 <span class="swap-arrow">🔁</span>
@@ -1025,7 +1051,7 @@ async function fetchAccountData(address) {
                         type = 'NFT Transfer';
                         senderAddress = action.NftItemTransfer.sender?.address || 'Unknown';
                         recipientAddress = action.NftItemTransfer.recipient?.address || 'Unknown';
-                        amountDisplay = `1 NFT`;
+                        amountDisplay = `1 NFT`; // NFT không có số thập phân hay dấu chấm
                         comment = action.NftItemTransfer.nft_info?.name || comment;
                         tokenImage = action.NftItemTransfer.nft_info?.image || tokenImage;
                         eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
@@ -1038,7 +1064,12 @@ async function fetchAccountData(address) {
                         // Attempt to find an image from simple_preview.items if available
                         const previewImage = action.simple_preview?.items?.find(item => item.image)?.image;
                         tokenImage = previewImage || 'https://via.placeholder.com/40'; // Fallback to a generic placeholder
-                        amountDisplay = action.simple_preview?.value || amountDisplay;
+                        // Cố gắng định dạng amountDisplay nếu nó là số và có thể có thập phân
+                        if (action.simple_preview?.value && !isNaN(parseFloat(action.simple_preview.value))) {
+                             amountDisplay = formatEventAmount(parseFloat(action.simple_preview.value));
+                        } else {
+                             amountDisplay = action.simple_preview?.value || amountDisplay;
+                        }
                         eventClass = '';
                     }
                 }
