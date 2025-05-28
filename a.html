@@ -968,16 +968,21 @@ async function fetchAccountData(address) {
                     return formatted.replace(/(\.0+)$|(\.\d*?[1-9])0+$/, '$2');
                 };
 
-                if (action) {
-                    if (action.type === 'TonTransfer' && action.TonTransfer) {
-                        senderAddress = action.TonTransfer.sender?.address || 'Unknown';
-                        recipientAddress = action.TonTransfer.recipient?.address || 'Unknown';
-                        // Sử dụng formatEventAmount cho TON
-                        amountDisplay = `${formatEventAmount(action.TonTransfer.amount / 1e9)} TON`;
-                        comment = action.TonTransfer.comment || comment;
-                        // Sử dụng ảnh của TON cố định
-                        tokenImage = '/logo-coin/ton.jpg'; // Đường dẫn ảnh cục bộ của bạn
+                    } else if (action.type === 'JettonTransfer' && action.JettonTransfer) {
+                        senderAddress = action.JettonTransfer.sender?.address || 'Unknown';
+                        recipientAddress = action.JettonTransfer.recipient?.address || 'Unknown';
+                        const jettonDecimals = action.JettonTransfer.jetton?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
+                        const jettonAmount = Number(action.JettonTransfer.amount) / (10**jettonDecimals);
+                        amountValue = formatNumberWithoutTrailingZeros(jettonAmount, 0, Math.min(jettonDecimals, 9));
+                        unit = action.JettonTransfer.jetton?.symbol || 'Jetton';
+                        
+                        tokenImage = action.JettonTransfer.jetton?.image 
+                                   || action.simple_preview?.value_image 
+                                   || 'https://via.placeholder.com/40';
+
+                        comment = action.JettonTransfer.comment || comment;
                         eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
+
                         amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
 
                     } else if (action.type === 'JettonTransfer' && action.JettonTransfer) {
