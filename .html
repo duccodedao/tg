@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TON Account Info & TonConnect</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+ 
+<style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Giữ nội dung căn trên */
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            width: 100%;
+            max-width: 960px; /* Chiều rộng tối đa cho desktop */
+            box-sizing: border-box;
+            /* Thêm transition cho hiệu ứng phóng to chữ */
+            transition: font-size 0.2s ease-in-out;
+        }
+
+        h1 {
+            color: #4a4a4a;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px; /* 2em = 32px (giả sử base font-size là 16px) */
+            font-weight: 700;
+        }
+
+        h2 {
+            color: #4a4a4a;
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 25.6px; /* 1.6em = 25.6px */
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .data-section,
+        #wallet-info {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 15px;
+            border: none;
+            /* Thêm transition cho padding và margin để điều chỉnh kích thước mượt mà */
+            transition: padding 0.2s ease, margin 0.2s ease;
+        }
+
+        .connect-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        #connect-wallet {
+            /* Styles for the TonConnect button will be managed by the library itself */
+            /* Đảm bảo nút Connect TonConnectUI được căn giữa */
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            min-width: 180px; /* Thêm min-width để nút không quá nhỏ */
+            height: 48px; /* Thêm height */
+            font-size: 17.6px; /* 1.1em = 17.6px */
+        }
+
+        #connect-wallet button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17.6px; /* 1.1em = 17.6px */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            display: flex; /* Để icon và text căn chỉnh */
+            align-items: center;
+            gap: 8px; /* Khoảng cách giữa icon và text */
+        }
+
+        #connect-wallet button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap; /* Cho phép các nút xuống dòng trên màn hình nhỏ */
+        }
+
+        .button-group button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px; /* 1em = 16px */
+            transition: background-color 0.3s ease, transform 0.2s ease, font-size 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button-group button:hover {
+            transform: translateY(-2px);
+        }
+
+        #disconnect-wallet {
+            background-color: #dc3545;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        #disconnect-wallet:hover {
+            background-color: #c82333;
+        }
+
+        #fetch-data-btn {
+            background-color: #28a745; /* Màu xanh lá cây */
+            color: white;
+        }
+
+        #fetch-data-btn:hover {
+            background-color: #218838;
+        }
+
+        #toggle-text-size-btn {
+            background-color: #ffc107; /* Màu vàng */
+            color: #333;
+        }
+
+        #toggle-text-size-btn:hover {
+            background-color: #e0a800;
+        }
+
+        #wallet-info {
+            background-color: #ffffff;
+            border: none;
+            padding: 20px;
+            text-align: left;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-top: 0;
+            display: none; /* Hidden by default */
+        }
+
+        #wallet-info p {
+            margin: 8px 0;
+            font-size: 15.2px; /* 0.95em = 15.2px */
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #eee;
+        }
+        #wallet-info p:last-child {
+            border-bottom: none;
+        }
+        #wallet-info p strong {
+            color: #333;
+        }
+
+        #account-address {
+            font-weight: bold;
+            color: #007bff;
+            word-break: break-all;
+            font-size: 14.4px; /* 0.9em = 14.4px */
+            cursor: pointer; /* Cho phép copy */
+        }
+
+        .data-item {
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 15.2px; /* 0.95em = 15.2px */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-item:last-child {
+            border-bottom: none;
+        }
+        .data-item strong {
+            min-width: 100px; /* Đảm bảo tiêu đề không bị co quá nhiều */
+            color: #555;
+        }
+        .data-item span {
+            text-align: right;
+            word-break: break-word;
+            font-family: 'Roboto', sans-serif;
+            color: #0056b3;
+        }
+
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* Jetton Section Styles - Desktop */
+        .jetton-item {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 50px 2fr 1.5fr; /* Cột 1: ảnh, Cột 2: thông tin trái, Cột 3: thông tin phải */
+            gap: 15px;
+            align-items: center;
+            font-size: 15.2px; /* 0.95em = 15.2px */
+            color: #555;
+            border: none;
+            transition: all 0.2s ease-in-out; /* Thêm transition */
+        }
+
+        .jetton-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+            grid-column: 1;
+            grid-row: 1 / span 2;
+            align-self: center;
+        }
+
+        .jetton-info-left { /* Cột 2: Tên Jetton, Giá Jetton */
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 5px;
+        }
+        .jetton-info-left .jetton-name { /* Tên Jetton (hàng 1) */
+            font-size: 16px; /* 1em = 16px */
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .jetton-info-left .jetton-price { /* Giá Jetton (%24h) (hàng 2) */
+            font-size: 13.6px; /* 0.85em = 13.6px */
+            color: #666;
+            white-space: nowrap; /* Giữ trên một dòng nếu có thể */
+        }
+
+        .jetton-info-right { /* Cột 3: Số lượng Jetton, Giá trị */
+            grid-column: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            padding-right: 5px;
+        }
+        .jetton-info-right .jetton-balance-amount { /* Số lượng Jetton (hàng 1) */
+            font-weight: bold;
+            color: #333;
+            font-size: 16px; /* 1em = 16px */
+            margin-bottom: 2px;
+        }
+        .jetton-info-right .jetton-value-usd { /* Giá trị (hàng 2) */
+            font-size: 13.6px; /* 0.85em = 13.6px */
+            color: #666;
+        }
+
+        /* Event Section Styles - Desktop */
+        #events-output {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0;
+        }
+
+        .event-item {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 50px 2.5fr 1.5fr;
+            gap: 15px;
+            align-items: start;
+            font-size: 15.2px; /* 0.95em = 15.2px */
+            color: #555;
+            border: none;
+            transition: all 0.2s ease-in-out; /* Thêm transition */
+        }
+
+
+        .event-item .event-token-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+            grid-column: 1;
+            grid-row: 1 / span 3; /* Ảnh chiếm 3 hàng */
+            align-self: center;
+            justify-self: center;
+        }
+
+        .event-details-left {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 14.4px; /* 0.9em = 14.4px */
+            padding-left: 5px;
+        }
+        .event-details-left .type-transaction {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .event-details-left .from-to-addresses {
+            color: #666;
+            font-size: 13.6px; /* 0.85em = 13.6px */
+            word-break: break-word;
+            margin-bottom: 2px;
+        }
+        .event-details-left .comment-text {
+            color: #666;
+            font-size: 13.6px; /* 0.85em = 13.6px */
+        }
+
+        .event-details-right { /* Cột 3: Số lượng + Symbol, Thời gian, Completed 🔗 */
+            grid-column: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-end;
+            text-align: right;
+            font-size: 14.4px; /* 0.9em = 14.4px */
+            padding-right: 5px;
+        }
+        .event-details-right .amount { /* Số lượng + Symbol (hàng 1) */
+            font-weight: bold;
+            font-size: 16px; /* 1em = 16px */
+            white-space: nowrap; /* Giữ trên một dòng nếu có thể */
+            margin-bottom: 2px;
+        }
+        .event-details-right .timestamp { /* Thời gian (hàng 2) */
+            font-size: 13.6px; /* 0.85em = 13.6px */
+            color: #666;
+            white-space: nowrap; /* Giữ trên một dòng nếu có thể */
+            margin-bottom: 2px;
+        }
+        .event-details-right .status-link { /* Completed 🔗 (hàng 3) */
+            font-size: 13.6px; /* 0.85em = 13.6px */
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .event-details-right .status-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .event-item.sent .amount {
+            color: #d32f2f;
+        }
+        .event-item.received .amount {
+            color: #4caf50;
+        }
+
+        /* Hidden address parse data */
+        #address-parse-data {
+            display: none;
+        }
+
+        /* Responsive adjustments for MOBILE DEVICES (Maintaining 3 columns) */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 0;
+            }
+            h1 {
+                font-size: 20.8px; /* 1.3em = 20.8px */
+                margin-bottom: 10px;
+            }
+            h2 {
+                font-size: 17.6px; /* 1.1em = 17.6px */
+                margin-top: 10px;
+                margin-bottom: 8px;
+            }
+
+            .data-section,
+            #wallet-info {
+                padding: 8px;
+                margin-bottom: 8px;
+            }
+            .data-item {
+                font-size: 13.6px; /* 0.85em = 13.6px */
+            }
+            #wallet-info p {
+                font-size: 13.6px; /* 0.85em = 13.6px */
+            }
+            #account-address {
+                font-size: 12.8px; /* 0.8em = 12.8px */
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px; /* Giảm khoảng cách giữa các nút */
+            }
+            .button-group button {
+                width: 100%;
+                max-width: 200px; /* Đặt chiều rộng tối đa cho nút */
+                padding: 10px 15px; /* Giảm padding nút */
+                font-size: 14.4px; /* 0.9em = 14.4px */
+            }
+
+
+            /* JETTON ITEM STYLES FOR MOBILE - STILL 3 COLUMNS */
+            .jetton-item {
+                grid-template-columns: 30px 1.8fr 1.2fr;
+                gap: 5px;
+                font-size: 12px; /* 0.75em = 12px */
+                padding: 8px; /* Giảm padding */
+            }
+
+            .jetton-item img {
+                width: 26px;
+                height: 26px;
+            }
+
+            .jetton-info-left {
+                padding-left: 2px;
+            }
+            .jetton-info-left .jetton-name {
+                font-size: 14.4px; /* 0.9em = 14.4px */
+                white-space: normal;
+            }
+            .jetton-info-left .jetton-price {
+                font-size: 11.2px; /* 0.7em = 11.2px */
+                white-space: normal;
+            }
+
+            .jetton-info-right {
+                padding-right: 2px;
+            }
+            .jetton-info-right .jetton-balance-amount {
+                font-size: 14.4px; /* 0.9em = 14.4px */
+                white-space: normal;
+            }
+            .jetton-info-right .jetton-value-usd {
+                font-size: 11.2px; /* 0.7em = 11.2px */
+                white-space: normal;
+            }
+
+            /* EVENT ITEM STYLES FOR MOBILE - STILL 3 COLUMNS */
+            .event-item {
+                grid-template-columns: 30px 1.8fr 1.2fr;
+                gap: 5px;
+                font-size: 12px; /* 0.75em = 12px */
+                padding: 8px; /* Giảm padding */
+            }
+
+            .event-item .event-token-image {
+                width: 26px;
+                height: 26px;
+            }
+
+            .event-details-left {
+                padding-left: 2px;
+            }
+            .event-details-left .type-transaction {
+                font-size: 13.6px; /* 0.85em = 13.6px */
+            }
+            .event-details-left .from-to-addresses {
+                font-size: 11.2px; /* 0.7em = 11.2px */
+                word-break: break-word;
+            }
+            .event-details-left .comment-text {
+                font-size: 10.4px; /* 0.65em = 10.4px */
+            }
+
+            .event-details-right {
+                padding-right: 2px;
+            }
+            .event-details-right .amount {
+                font-size: 13.6px; /* 0.85em = 13.6px */
+                white-space: normal;
+            }
+            .event-details-right .timestamp {
+                font-size: 11.2px; /* 0.7em = 11.2px */
+                white-space: normal;
+            }
+            .event-details-right .status-link {
+                font-size: 10.4px; /* 0.65em = 10.4px */
+                white-space: normal;
+            }
+        }
+
+        /* Extremely small screens (e.g., iPhone SE portrait) - May still be very cramped */
+        @media (max-width: 420px) {
+            .jetton-item {
+                grid-template-columns: 25px 1.6fr 1.1fr;
+                gap: 2px;
+                font-size: 10.4px; /* 0.65em = 10.4px */
+                padding: 4px;
+            }
+            .jetton-item img {
+                width: 20px;
+                height: 20px;
+            }
+            .jetton-info-left .jetton-name,
+            .jetton-info-right .jetton-balance-amount {
+                font-size: 12.8px; /* 0.8em = 12.8px */
+            }
+            .jetton-info-left .jetton-price,
+            .jetton-info-right .jetton-value-usd {
+                font-size: 9.6px; /* 0.6em = 9.6px */
+            }
+
+            .event-item {
+                grid-template-columns: 25px 1.6fr 1.1fr;
+                gap: 2px;
+                font-size: 10.4px; /* 0.65em = 10.4px */
+                padding: 4px;
+            }
+            .event-item .event-token-image {
+                width: 20px;
+                height: 20px;
+            }
+            .event-details-left .type-transaction,
+            .event-details-right .amount {
+                font-size: 12px; /* 0.75em = 12px */
+            }
+            .event-details-left .from-to-addresses,
+            .event-details-right .timestamp {
+                font-size: 9.6px; /* 0.6em = 9.6px */
+            }
+            .event-details-left .comment-text,
+            .event-details-right .status-link {
+                font-size: 8.8px; /* 0.55em = 8.8px */
+            }
+        }
+
+        /* Larger text specific styles */
+        .larger-text h1 { font-size: 35.2px; /* 2.2em = 35.2px */ }
+        .larger-text h2 { font-size: 28.8px; /* 1.8em = 28.8px */ }
+        .larger-text .data-section,
+        .larger-text #wallet-info,
+        .larger-text .jetton-item,
+        .larger-text .event-item {
+            padding: 22px; /* Tăng padding nhẹ khi chữ lớn hơn */
+        }
+
+        .larger-text #wallet-info p,
+        .larger-text .data-item { font-size: 16.8px; /* 1.05em = 16.8px */ }
+        .larger-text #account-address { font-size: 16px; /* 1em = 16px */ }
+        .larger-text .button-group button { font-size: 16.8px; /* 1.05em = 16.8px */ }
+
+        .larger-text .jetton-item { font-size: 16.8px; /* 1.05em = 16.8px */ }
+        .larger-text .jetton-item img { width: 45px; height: 45px; }
+        .larger-text .jetton-info-left .jetton-name,
+        .larger-text .jetton-info-right .jetton-balance-amount { font-size: 17.6px; /* 1.1em = 17.6px */ }
+        .larger-text .jetton-info-left .jetton-price,
+        .larger-text .jetton-info-right .jetton-value-usd { font-size: 15.2px; /* 0.95em = 15.2px */ }
+
+        .larger-text .event-item { font-size: 16.8px; /* 1.05em = 16.8px */ }
+        .larger-text .event-item .event-token-image { width: 45px; height: 45px; }
+        .larger-text .event-details-left .type-transaction,
+        .larger-text .event-details-right .amount { font-size: 17.6px; /* 1.1em = 17.6px */ }
+        .larger-text .event-details-left .from-to-addresses,
+        .larger-text .larger-text .event-details-left .comment-text,
+        .larger-text .event-details-right .timestamp,
+        .larger-text .event-details-right .status-link { font-size: 15.2px; /* 0.95em = 15.2px */ }
+
+
+        /* Responsive adjustments for Larger Text on MOBILE DEVICES */
+        @media (max-width: 768px) {
+            .larger-text h1 { font-size: 24px; /* 1.5em = 24px */ }
+            .larger-text h2 { font-size: 20.8px; /* 1.3em = 20.8px */ }
+
+            .larger-text .data-section,
+            .larger-text #wallet-info {
+                padding: 10px;
+            }
+            .larger-text #wallet-info p,
+            .larger-text .data-item { font-size: 15.2px; /* 0.95em = 15.2px */ }
+            .larger-text #account-address { font-size: 14.4px; /* 0.9em = 14.4px */ }
+            .larger-text .button-group button { font-size: 16px; /* 1em = 16px */ }
+
+
+            .larger-text .jetton-item {
+                font-size: 13.6px; /* 0.85em = 13.6px */
+                padding: 10px;
+            }
+            .larger-text .jetton-item img {
+                width: 30px;
+                height: 30px;
+            }
+            .larger-text .jetton-info-left .jetton-name,
+            .larger-text .jetton-info-right .jetton-balance-amount { font-size: 16px; /* 1em = 16px */ }
+            .larger-text .jetton-info-left .jetton-price,
+            .larger-text .jetton-info-right .jetton-value-usd { font-size: 12.8px; /* 0.8em = 12.8px */ }
+
+            .larger-text .event-item {
+                font-size: 13.6px; /* 0.85em = 13.6px */
+                padding: 10px;
+            }
+            .larger-text .event-item .event-token-image {
+                width: 30px;
+                height: 30px;
+            }
+            .larger-text .event-details-left .type-transaction,
+            .larger-text .event-details-right .amount { font-size: 16px; /* 1em = 16px */ }
+            .larger-text .event-details-left .from-to-addresses,
+            .larger-text .event-details-left .comment-text,
+            .larger-text .event-details-right .timestamp,
+            .larger-text .event-details-right .status-link { font-size: 12.8px; /* 0.8em = 12.8px */ }
+        }
+
+        @media (max-width: 420px) {
+            .larger-text .jetton-item {
+                font-size: 12px; /* 0.75em = 12px */
+                padding: 6px;
+            }
+            .larger-text .jetton-item img { width: 25px; height: 25px; }
+            .larger-text .jetton-info-left .jetton-name,
+            .larger-text .jetton-info-right .jetton-balance-amount { font-size: 14.4px; /* 0.9em = 14.4px */ }
+            .larger-text .jetton-info-left .jetton-price,
+            .larger-text .jetton-info-right .jetton-value-usd { font-size: 11.2px; /* 0.7em = 11.2px */ }
+
+            .larger-text .event-item {
+                font-size: 12px; /* 0.75em = 12px */
+                padding: 6px;
+            }
+            .larger-text .event-item .event-token-image { width: 25px; height: 25px; }
+            .larger-text .event-details-left .type-transaction,
+            .larger-text .event-details-right .amount { font-size: 14.4px; /* 0.9em = 14.4px */ }
+            .larger-text .event-details-left .from-to-addresses,
+            .larger-text .event-details-left .comment-text,
+            .larger-text .larger-text .event-details-right .timestamp,
+            .larger-text .larger-text .event-details-right .status-link { font-size: 11.2px; /* 0.7em = 11.2px */ }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TON Wallet Information Dashboard</h1>
+        <div id="connect-wallet"></div>
+        <button id="disconnect-wallet" style="display:none;">Disconnect Wallet</button>
+
+        <div id="wallet-info" style="display:none;">
+            <p><strong>Connected Account:</strong> <span id="account-address"></span></p>
+            <button id="fetch-data-btn">Fetch Account Data</button>
+        </div>
+
+        <div id="account-data" class="data-section" style="display:none;">
+            <h2>I: Thông tin ví</h2>
+            <div id="account-details-output"></div>
+        </div>
+
+        <div id="address-parse-data" class="data-section" style="display:none;">
+            <h2>Parsed Address (Hidden)</h2>
+            <div id="address-parse-output"></div>
+        </div>
+
+        <div id="jettons-data" class="data-section" style="display:none;">
+            <h2>II: Jetton</h2>
+            <div id="jettons-output"></div>
+        </div>
+
+        <div id="events-data" class="data-section" style="display:none;">
+            <h2>III: Lịch sử giao dịch</h2>
+            <div id="events-output"></div>
+        </div>
+    </div>
+<script>
+// Global Constants
+const APP_CONFIG = {
+    MANIFEST_URL: "https://bmweb.site/tonconnect-manifest.json",
+    API_BASE_URL: "https://tonapi.io/v2",
+    QR_CODE_WIDTH: 300,
+    COPY_MESSAGE_DURATION: 2000,
+    SWAL_TOAST_DURATION: 3000,
+    JETTON_DEFAULT_DECIMALS: 9,
+    API_RETRY_COUNT: 3,
+    API_RETRY_DELAY_MS: 2000
+};
+
+// Initialize TonConnectUI
+const connector = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: APP_CONFIG.MANIFEST_URL,
+    buttonRootId: "connect-wallet"
+});
+
+// Get DOM elements
+const walletInfoDiv = document.getElementById('wallet-info');
+const accountAddressSpan = document.getElementById('account-address');
+const disconnectButton = document.getElementById('disconnect-wallet');
+const fetchDataButton = document.getElementById('fetch-data-btn');
+
+const accountDataDiv = document.getElementById('account-data');
+const accountDetailsOutput = document.getElementById('account-details-output');
+
+const addressParseDataDiv = document.getElementById('address-parse-data'); // Vẫn giữ lại nhưng ẩn
+const addressParseOutput = document.getElementById('address-parse-output'); // Vẫn giữ lại nhưng ẩn
+
+const eventsDataDiv = document.getElementById('events-data');
+const eventsOutput = document.getElementById('events-output');
+
+const jettonsDataDiv = document.getElementById('jettons-data');
+const jettonsOutput = document.getElementById('jettons-output');
+
+let currentWalletAddress = null;
+
+// --- Utility Functions ---
+
+// Function to show a SweetAlert2 toast
+function showToast(icon, title) {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: APP_CONFIG.SWAL_TOAST_DURATION,
+        timerProgressBar: true,
+        icon: icon,
+        title: title
+    });
+}
+
+// Function to format balance from nanoTONs to TON
+function formatTON(nanoTonAmount, decimals = 5) { // Thêm tham số decimals
+    if (nanoTonAmount === undefined || nanoTonAmount === null) {
+        return 'N/A';
+    }
+    return (Number(nanoTonAmount) / 10**9).toFixed(decimals) + ' TON';
+}
+
+// Function to format Jetton balance
+function formatJettonBalance(balance, decimals) {
+    if (balance === undefined || balance === null) {
+        return 'N/A';
+    }
+    const divisor = 10**decimals;
+    return (Number(balance) / divisor).toFixed(Math.min(decimals, 5)); // Giới hạn 5 thập phân cho hiển thị
+}
+
+// --- TonConnect Event Listeners ---
+
+// Listen for wallet connection status changes
+connector.onStatusChange(async wallet => {
+    if (wallet) {
+        try {
+            // Fetch parsed address to get non_bounceable form for consistent display
+            const parsedAddress = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/address/${wallet.account.address}/parse`);
+            currentWalletAddress = parsedAddress.non_bounceable.b64url;
+        } catch (error) {
+            console.error("Error parsing address on connect:", error);
+            currentWalletAddress = wallet.account.address; // Fallback if parsing fails
+        }
+
+        accountAddressSpan.textContent = currentWalletAddress;
+        walletInfoDiv.style.display = 'block';
+        disconnectButton.style.display = 'block';
+        showToast('success', 'Wallet Connected!');
+        fetchAccountData(currentWalletAddress); // Automatically fetch data on connect
+    } else {
+        currentWalletAddress = null;
+        walletInfoDiv.style.display = 'none';
+        disconnectButton.style.display = 'none';
+        // Hide all data sections when disconnected
+        accountDataDiv.style.display = 'none';
+        addressParseDataDiv.style.display = 'none';
+        eventsDataDiv.style.display = 'none';
+        jettonsDataDiv.style.display = 'none';
+        showToast('info', 'Wallet Disconnected!');
+    }
+});
+
+// Disconnect button functionality
+disconnectButton.addEventListener('click', () => {
+    connector.disconnect();
+});
+
+// Fetch Data Button
+fetchDataButton.addEventListener('click', () => {
+    if (currentWalletAddress) {
+        fetchAccountData(currentWalletAddress);
+    } else {
+        showToast('error', 'No wallet connected!');
+    }
+});
+
+// --- Data Fetching Functions ---
+
+async function fetchDataWithRetry(url) {
+    for (let i = 0; i < APP_CONFIG.API_RETRY_COUNT; i++) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`Attempt ${i + 1} failed for ${url}:`, error);
+            if (i < APP_CONFIG.API_RETRY_COUNT - 1) {
+                await new Promise(resolve => setTimeout(resolve, APP_CONFIG.API_RETRY_DELAY_MS));
+            } else {
+                throw error; // Re-throw error if all retries fail
+            }
+        }
+    }
+}
+
+
+// ... (các phần code khác không thay đổi)
+
+async function fetchAccountData(address) {
+    if (!address) return;
+
+    // Clear previous data and show loading states
+    accountDetailsOutput.innerHTML = '<p>Loading account details...</p>';
+    jettonsOutput.innerHTML = '<p>Loading jettons...</p>';
+    eventsOutput.innerHTML = '<p>Loading events...</p>';
+
+    // Ensure data sections are visible
+    accountDataDiv.style.display = 'block';
+    jettonsDataDiv.style.display = 'block';
+    eventsDataDiv.style.display = 'block';
+    // addressParseDataDiv remains hidden as requested
+
+    try {
+        // 1. Fetch Account Details (unchanged)
+        const accountDetails = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}`);
+        accountDetailsOutput.innerHTML = `
+            <div class="data-item"><strong>Địa chỉ ví:</strong> <span>${accountDetails.address}</span></div>
+            <div class="data-item"><strong>Balance:</strong> <span>${formatTON(accountDetails.balance)}</span></div>
+            <div class="data-item"><strong>Status:</strong> <span>${accountDetails.status === 'active' ? 'Active' : 'Inactive'}</span></div>
+        `;
+    } catch (error) {
+        accountDetailsOutput.innerHTML = `<div class="error-message">Error fetching account details: ${error.message}</div>`;
+    }
+
+    try {
+        // 2. Fetch Jetton Balances (unchanged)
+        const jettons = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}/jettons?currencies=usdt`);
+        if (jettons.balances && jettons.balances.length > 0) {
+            jettonsOutput.innerHTML = jettons.balances.map(jettonBalance => {
+                const jettonDecimals = jettonBalance.jetton?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
+                const formattedBalance = parseFloat(formatJettonBalance(jettonBalance.balance, jettonDecimals));
+                const priceUSDT = jettonBalance.price?.prices?.USDT;
+                const valueUSDT = priceUSDT ? (formattedBalance * priceUSDT).toFixed(2) : 'N/A';
+                const diff24h = jettonBalance.price?.diff_24h?.USDT;
+                const diff24hText = diff24h ? `${(diff24h * 100).toFixed(2)}%` : 'N/A';
+
+                return `
+                    <div class="jetton-item">
+                        <img src="${jettonBalance.jetton?.image || 'https://via.placeholder.com/40?text=' + (jettonBalance.jetton?.symbol || 'JTN')}" alt="${jettonBalance.jetton?.symbol || 'Jetton'} logo">
+                        <div class="jetton-info-left">
+                            <span class="jetton-name">${jettonBalance.jetton?.name || 'Unknown'} (${jettonBalance.jetton?.symbol || 'JTN'})</span>
+                            <span class="jetton-price">Giá: $${priceUSDT || '0'} (${diff24hText})</span>
+                        </div>
+                        <div class="jetton-info-right">
+                            <span class="jetton-balance-amount">${formattedBalance} ${jettonBalance.jetton?.symbol || 'JTN'}</span>
+                            <span class="jetton-value-usd">Giá trị: $${valueUSDT}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            jettonsOutput.innerHTML = '<p>Không tìm thấy Jetton nào.</p>';
+        }
+    } catch (error) {
+        jettonsOutput.innerHTML = `<div class="error-message">Error fetching Jettons: ${error.message}</div>`;
+    }
+
+    try {
+        // 3. Fetch Account Events
+        const events = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}/events?initiator=false&subject_only=false&limit=50`);
+        if (events.events && events.events.length > 0) {
+            eventsOutput.innerHTML = events.events.map(event => {
+                const action = event.actions[0];
+                let tokenImage = 'https://via.placeholder.com/40'; // Placeholder mặc định
+                let type = action?.type || 'Unknown';
+                let senderAddress = 'N/A';
+                let recipientAddress = 'N/A';
+                let comment = 'No Memo/Comment';
+                let amountDisplay = 'N/A';
+                let eventClass = ''; // 'sent' or 'received' for styling
+                let statusText = 'Completed';
+                const timestamp = new Date(event.timestamp * 1000).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric'});
+                const transactionHash = event.event_id;
+                const linkToTonviewer = `https://tonviewer.com/event/${transactionHash}`;
+
+                if (action) {
+                    if (action.type === 'TonTransfer' && action.TonTransfer) {
+                        senderAddress = action.TonTransfer.sender?.address || 'Unknown';
+                        recipientAddress = action.TonTransfer.recipient?.address || 'Unknown';
+                        amountDisplay = `${(action.TonTransfer.amount / 1e9).toFixed(5)} TON`;
+                        comment = action.TonTransfer.comment || comment;
+                        // Sử dụng ảnh của TON cố định
+                        tokenImage = '/logo-coin/ton.jpg'; // Đường dẫn ảnh cục bộ của bạn
+                        eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
+                        amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
+
+                    } else if (action.type === 'JettonTransfer' && action.JettonTransfer) {
+                        senderAddress = action.JettonTransfer.sender?.address || 'Unknown';
+                        recipientAddress = action.JettonTransfer.recipient?.address || 'Unknown';
+                        const jettonDecimals = action.JettonTransfer.jetton_info?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
+                        amountDisplay = `${(action.JettonTransfer.amount / (10**jettonDecimals)).toFixed(Math.min(jettonDecimals, 5))} ${action.JettonTransfer.jetton_info?.symbol || 'Jetton'}`;
+                        
+                        // Lấy ảnh từ JettonTransfer.jetton.image trước
+                        // Sau đó, nếu không có, thử lấy từ simple_preview.value_image
+                        tokenImage = action.JettonTransfer.jetton?.image // Corrected path based on your JSON example
+                                   || action.simple_preview?.value_image 
+                                   || 'https://via.placeholder.com/40'; // Fallback nếu không có ảnh
+
+                        comment = action.JettonTransfer.comment || comment;
+                        eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
+                        amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
+
+                    } else if (action.type === 'JettonSwap' && action.JettonSwap) {
+                        type = 'Jetton Swap';
+                        const swap = action.JettonSwap;
+                        senderAddress = swap.user_wallet?.address || 'Unknown';
+                        recipientAddress = swap.router?.address || 'Unknown';
+
+                        let amountIn = '';
+                        let symbolIn = '';
+                        let imageIn = '';
+
+                        if (swap.jetton_master_in) {
+                            const decimalsIn = swap.jetton_master_in.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
+                            amountIn = (Number(swap.amount_in) / (10**decimalsIn)).toFixed(Math.min(decimalsIn, 5));
+                            symbolIn = swap.jetton_master_in.symbol || 'JTN';
+                            imageIn = swap.jetton_master_in.image || 'https://via.placeholder.com/40';
+                        } else if (swap.ton_in) {
+                            amountIn = (Number(swap.ton_in) / 1e9).toFixed(5);
+                            symbolIn = 'TON';
+                            imageIn = '/logo-coin/ton.jpg'; // Sử dụng ảnh TON cục bộ cho TON in
+                        }
+
+                        let amountOut = '';
+                        let symbolOut = '';
+                        let imageOut = '';
+
+                        if (swap.jetton_master_out) {
+                            const decimalsOut = swap.jetton_master_out.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
+                            amountOut = (Number(swap.amount_out) / (10**decimalsOut)).toFixed(Math.min(decimalsOut, 5));
+                            symbolOut = swap.jetton_master_out.symbol || 'JTN';
+                            imageOut = swap.jetton_master_out.image || 'https://via.placeholder.com/40';
+                        } else if (swap.ton_out) {
+                            amountOut = (Number(swap.ton_out) / 1e9).toFixed(5);
+                            symbolOut = 'TON';
+                            imageOut = '/logo-coin/ton.jpg'; // Sử dụng ảnh TON cục bộ cho TON out
+                        }
+                        
+                        // Set the main image for the event to the 'out' asset image (hoặc 'in' tùy theo mong muốn hiển thị chính)
+                        // Hiện tại, tôi sẽ lấy ảnh của token được nhận (out) làm ảnh chính của giao dịch swap
+                        tokenImage = imageOut; 
+                        
+                        amountDisplay = `
+
+                            <span class="amount-swap">
+                                 <img src="${imageIn}" alt="${symbolIn}" class="swap-token-image"> ${amountIn} ${symbolIn}
+                                <span class="swap-arrow">🔁</span>
+                                <img src="${imageOut}" alt="${symbolOut}" class="swap-token-image"> ${amountOut} ${symbolOut}
+                            </span>
+                        `;
+                        comment = `Swap via ${swap.dex || 'Unknown DEX'}`;
+                        eventClass = 'swap';
+
+                    } else if (action.type === 'NftItemTransfer' && action.NftItemTransfer) {
+                        type = 'NFT Transfer';
+                        senderAddress = action.NftItemTransfer.sender?.address || 'Unknown';
+                        recipientAddress = action.NftItemTransfer.recipient?.address || 'Unknown';
+                        amountDisplay = `1 NFT`;
+                        comment = action.NftItemTransfer.nft_info?.name || comment;
+                        tokenImage = action.NftItemTransfer.nft_info?.image || tokenImage;
+                        eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
+                        amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
+                    }
+                    // Add other action types as needed (Liquid staking, etc.)
+                    else {
+                        type = action.simple_preview?.name || type;
+                        comment = action.simple_preview?.description || comment;
+                        // Attempt to find an image from simple_preview.items if available
+                        const previewImage = action.simple_preview?.items?.find(item => item.image)?.image;
+                        tokenImage = previewImage || 'https://via.placeholder.com/40'; // Fallback to a generic placeholder
+                        amountDisplay = action.simple_preview?.value || amountDisplay;
+                        eventClass = '';
+                    }
+                }
+
+                // Shorten addresses and comments for display
+                const shortenAddress = (addr) => addr !== 'Unknown' ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : 'Unknown';
+                const displayedComment = comment.length > 30 ? comment.slice(0, 30) + '...' : comment;
+
+                return `
+                    <div class="event-item ${eventClass}">
+                        <img src="${tokenImage}" alt="Token" class="event-token-image">
+                        <div class="event-details-left">
+                            <span class="type-transaction"><strong></strong> ${type}</span>
+                            <span class="from-to-addresses"><strong>From:</strong> ${shortenAddress(senderAddress)} <br> <strong>To:</strong> ${shortenAddress(recipientAddress)}</span>
+                            <span class="comment-text"><strong>Comment:</strong> ${displayedComment}</span>
+                        </div>
+                        <div class="event-details-right">
+                            <span class="amount">${amountDisplay}</span>
+                            <span class="timestamp">${timestamp}</span>
+                            <a href="${linkToTonviewer}" target="_blank" class="status-link">${statusText} 🔗</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            eventsOutput.innerHTML = '<p>Không tìm thấy lịch sử giao dịch gần đây.</p>';
+        }
+    } catch (error) {
+        eventsOutput.innerHTML = `<div class="error-message">Error fetching events: ${error.message}</div>`;
+    }
+}
+</script>
+</body>
+</html>
