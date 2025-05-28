@@ -983,18 +983,18 @@ async function fetchAccountData(address) {
                     } else if (action.type === 'JettonTransfer' && action.JettonTransfer) {
                         senderAddress = action.JettonTransfer.sender?.address || 'Unknown';
                         recipientAddress = action.JettonTransfer.recipient?.address || 'Unknown';
-                        const jettonDecimals = action.JettonTransfer.jetton_info?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                        // Sử dụng formatEventAmount cho Jetton
-                        amountDisplay = `${formatEventAmount(action.JettonTransfer.amount / (10**jettonDecimals), Math.min(jettonDecimals, 5))} ${action.JettonTransfer.jetton_info?.symbol || 'Jetton'}`;
+                        const jettonDecimals = action.JettonTransfer.jetton?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
+                        const jettonAmount = Number(action.JettonTransfer.amount) / (10**jettonDecimals);
+                        amountValue = formatNumberWithoutTrailingZeros(jettonAmount, 0, Math.min(jettonDecimals, 9));
+                        unit = action.JettonTransfer.jetton?.symbol || 'Jetton';
                         
-                        // Lấy ảnh từ JettonTransfer.jetton.image trước
-                        // Sau đó, nếu không có, thử lấy từ simple_preview.value_image
                         tokenImage = action.JettonTransfer.jetton?.image 
-                                       || action.simple_preview?.value_image 
-                                       || 'https://via.placeholder.com/40'; // Fallback nếu không có ảnh
+                                   || action.simple_preview?.value_image 
+                                   || 'https://via.placeholder.com/40';
 
                         comment = action.JettonTransfer.comment || comment;
                         eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
+
                         amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
 
                     } else if (action.type === 'JettonSwap' && action.JettonSwap) {
