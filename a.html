@@ -878,95 +878,54 @@ async function fetchDataWithRetry(url) {
 
 // ... (các phần code khác không thay đổi)
 
-async function fetchAccountData(address) {
-    if (!address) return;
+async function fetchAccountEvents(address, beforeLt = null, clearExisting = false) {
+    if (isLoadingEvents) return;
+    isLoadingEvents = true;
+    loadMoreEventsButton.disabled = true; // Vô hiệu hóa nút khi đang tải
 
-    // Clear previous data and show loading states
-    accountDetailsOutput.innerHTML = '<p>Loading account details...</p>';
-    jettonsOutput.innerHTML = '<p>Loading jettons...</p>';
-    eventsOutput.innerHTML = '<p>Loading events...</p>';
-
-    // Ensure data sections are visible
-    accountDataDiv.style.display = 'block';
-    jettonsDataDiv.style.display = 'block';
-    eventsDataDiv.style.display = 'block';
-    // addressParseDataDiv remains hidden as requested
-
-    try {
-        // 1. Fetch Account Details (unchanged)
-        const accountDetails = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}`);
-        accountDetailsOutput.innerHTML = `
-            <div class="data-item"><strong>Địa chỉ ví:</strong> <span>${accountDetails.address}</span></div>
-            <div class="data-item"><strong>Balance:</strong> <span>${formatTON(accountDetails.balance)}</span></div>
-            <div class="data-item"><strong>Status:</strong> <span>${accountDetails.status === 'active' ? 'Active' : 'Inactive'}</span></div>
-        `;
-    } catch (error) {
-        accountDetailsOutput.innerHTML = `<div class="error-message">Error fetching account details: ${error.message}</div>`;
+    let url = `${APP_CONFIG.API_BASE_URL}/accounts/${address}/events?initiator=false&subject_only=false&limit=${APP_CONFIG.EVENTS_PER_PAGE}`;
+    if (beforeLt) {
+        url += `&before_lt=${beforeLt}`;
     }
 
     try {
-        // 2. Fetch Jetton Balances (unchanged - đã được điều chỉnh trong formatJettonBalance)
-        const jettons = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}/jettons?currencies=usdt`);
-        if (jettons.balances && jettons.balances.length > 0) {
-            jettonsOutput.innerHTML = jettons.balances.map(jettonBalance => {
-                const jettonDecimals = jettonBalance.jetton?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                const formattedBalance = formatJettonBalance(jettonBalance.balance, jettonDecimals);
-                const priceUSDT = jettonBalance.price?.prices?.USDT;
-                // Để tính toán giá trị USDT, chúng ta cần loại bỏ dấu chấm phân cách hàng nghìn trước
-                const numericBalance = parseFloat(formattedBalance.replace(/\./g, '').replace(/,/g, '')); // Xử lý cả dấu phẩy nếu có
-                const valueUSDT = priceUSDT ? (numericBalance * priceUSDT).toFixed(2) : 'N/A';
-                const diff24h = jettonBalance.price?.diff_24h?.USDT;
-                const diff24hText = diff24h ? `${(diff24h * 100).toFixed(2)}%` : 'N/A';
+        const eventsResponse = await fetchDataWithRetry(url);
+        const newEvents = eventsResponse.events || [];
 
-                return `
-                    <div class="jetton-item">
-                        <img src="${jettonBalance.jetton?.image || 'https://via.placeholder.com/40?text=' + (jettonBalance.jetton?.symbol || 'JTN')}" alt="${jettonBalance.jetton?.symbol || 'Jetton'} logo">
-                        <div class="jetton-info-left">
-                            <span class="jetton-name">${jettonBalance.jetton?.name || 'Unknown'} (${jettonBalance.jetton?.symbol || 'JTN'})</span>
-                            <span class="jetton-price">Giá: $${priceUSDT || '0'} (${diff24hText})</span>
-                        </div>
-                        <div class="jetton-info-right">
-                            <span class="jetton-balance-amount">${formattedBalance} ${jettonBalance.jetton?.symbol || 'JTN'}</span>
-                            <span class="jetton-value-usd">Giá trị: $${valueUSDT}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            jettonsOutput.innerHTML = '<p>Không tìm thấy Jetton nào.</p>';
+        if (clearExisting) {
+            eventsOutput.innerHTML = ''; // Xóa các sự kiện cũ nếu là tải lại toàn bộ
+        } else if (eventsOutput.innerHTML === '<p>Đang tải lịch sử giao dịch...</p>' || eventsOutput.innerHTML === '<p>Không tìm thấy lịch sử giao dịch gần đây.</p>') {
+            eventsOutput.innerHTML = ''; // Xóa thông báo tải ban đầu
         }
-    } catch (error) {
-        jettonsOutput.innerHTML = `<div class="error-message">Error fetching Jettons: ${error.message}</div>`;
-    }
 
-    try {
-        // 3. Fetch Account Events
-        const events = await fetchDataWithRetry(`${APP_CONFIG.API_BASE_URL}/accounts/${address}/events?initiator=false&subject_only=false&limit=50`);
-        if (events.events && events.events.length > 0) {
-            eventsOutput.innerHTML = events.events.map(event => {
+
+        if (newEvents.length > 0) {
+            const eventsHtml = newEvents.map(event => {
                 const action = event.actions[0];
-                let tokenImage = 'https://via.placeholder.com/40'; // Placeholder mặc định
+                let tokenImage = 'https://via.placeholder.com/40';
                 let type = action?.type || 'Unknown';
                 let senderAddress = 'N/A';
                 let recipientAddress = 'N/A';
                 let comment = 'No Memo/Comment';
-                let amountDisplay = 'N/A';
-                let eventClass = ''; // 'sent' or 'received' for styling
+                let amountValue = '';
+                let unit = '';
+                let eventClass = '';
                 let statusText = 'Completed';
                 const timestamp = new Date(event.timestamp * 1000).toLocaleString('vi-VN', {hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric'});
                 const transactionHash = event.event_id;
                 const linkToTonviewer = `https://tonviewer.com/event/${transactionHash}`;
 
-                // Helper function to format numbers with thousands separator and remove trailing zeros
-                const formatEventAmount = (num, decimals = 5) => {
-                    if (isNaN(num) || num === null) return 'N/A';
-                    const formatted = num.toLocaleString('en-US', {
-                        minimumFractionDigits: 0, // Đảm bảo không có số thập phân nếu là số nguyên
-                        maximumFractionDigits: decimals // Sử dụng số thập phân tối đa được cung cấp
-                    });
-                    // Loại bỏ các số 0 thừa ở cuối và cả dấu thập phân nếu số là số nguyên
-                    return formatted.replace(/(\.0+)$|(\.\d*?[1-9])0+$/, '$2');
-                };
+                // --- Logic xử lý từng loại giao dịch ---
+                if (action) {
+                    if (action.type === 'TonTransfer' && action.TonTransfer) {
+                        senderAddress = action.TonTransfer.sender?.address || 'Unknown';
+                        recipientAddress = action.TonTransfer.recipient?.address || 'Unknown';
+                        const tonAmount = Number(action.TonTransfer.amount) / 1e9;
+                        amountValue = formatNumberWithoutTrailingZeros(tonAmount, 0, 5);
+                        unit = 'TON';
+                        comment = action.TonTransfer.comment || comment;
+                        tokenImage = '/logo-coin/ton.jpg';
+                        eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
 
                     } else if (action.type === 'JettonTransfer' && action.JettonTransfer) {
                         senderAddress = action.JettonTransfer.sender?.address || 'Unknown';
@@ -982,25 +941,6 @@ async function fetchAccountData(address) {
 
                         comment = action.JettonTransfer.comment || comment;
                         eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
-
-                        amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
-
-                    } else if (action.type === 'JettonTransfer' && action.JettonTransfer) {
-                        senderAddress = action.JettonTransfer.sender?.address || 'Unknown';
-                        recipientAddress = action.JettonTransfer.recipient?.address || 'Unknown';
-                        const jettonDecimals = action.JettonTransfer.jetton?.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                        const jettonAmount = Number(action.JettonTransfer.amount) / (10**jettonDecimals);
-                        amountValue = formatNumberWithoutTrailingZeros(jettonAmount, 0, Math.min(jettonDecimals, 9));
-                        unit = action.JettonTransfer.jetton?.symbol || 'Jetton';
-                        
-                        tokenImage = action.JettonTransfer.jetton?.image 
-                                   || action.simple_preview?.value_image 
-                                   || 'https://via.placeholder.com/40';
-
-                        comment = action.JettonTransfer.comment || comment;
-                        eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
-
-                        amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
 
                     } else if (action.type === 'JettonSwap' && action.JettonSwap) {
                         type = 'Jetton Swap';
@@ -1008,96 +948,152 @@ async function fetchAccountData(address) {
                         senderAddress = swap.user_wallet?.address || 'Unknown';
                         recipientAddress = swap.router?.address || 'Unknown';
 
-                        let amountIn = '';
+                        let amountInFormatted = '';
                         let symbolIn = '';
                         let imageIn = '';
 
                         if (swap.jetton_master_in) {
                             const decimalsIn = swap.jetton_master_in.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                            amountIn = formatEventAmount(Number(swap.amount_in) / (10**decimalsIn), Math.min(decimalsIn, 5));
+                            amountInFormatted = formatNumberWithoutTrailingZeros(Number(swap.amount_in) / (10**decimalsIn), 0, Math.min(decimalsIn, 9));
                             symbolIn = swap.jetton_master_in.symbol || 'JTN';
                             imageIn = swap.jetton_master_in.image || 'https://via.placeholder.com/40';
                         } else if (swap.ton_in) {
-                            amountIn = formatEventAmount(Number(swap.ton_in) / 1e9);
+                            amountInFormatted = formatNumberWithoutTrailingZeros(Number(swap.ton_in) / 1e9, 0, 5);
                             symbolIn = 'TON';
-                            imageIn = '/logo-coin/ton.jpg'; // Sử dụng ảnh TON cục bộ cho TON in
+                            imageIn = '/logo-coin/ton.jpg';
                         }
 
-                        let amountOut = '';
+                        let amountOutFormatted = '';
                         let symbolOut = '';
                         let imageOut = '';
 
                         if (swap.jetton_master_out) {
                             const decimalsOut = swap.jetton_master_out.decimals || APP_CONFIG.JETTON_DEFAULT_DECIMALS;
-                            amountOut = formatEventAmount(Number(swap.amount_out) / (10**decimalsOut), Math.min(decimalsOut, 5));
+                            amountOutFormatted = formatNumberWithoutTrailingZeros(Number(swap.amount_out) / (10**decimalsOut), 0, Math.min(decimalsOut, 9));
                             symbolOut = swap.jetton_master_out.symbol || 'JTN';
                             imageOut = swap.jetton_master_out.image || 'https://via.placeholder.com/40';
                         } else if (swap.ton_out) {
-                            amountOut = formatEventAmount(Number(swap.ton_out) / 1e9);
+                            amountOutFormatted = formatNumberWithoutTrailingZeros(Number(swap.ton_out) / 1e9, 0, 5);
                             symbolOut = 'TON';
-                            imageOut = '/logo-coin/ton.jpg'; // Sử dụng ảnh TON cục bộ cho TON out
+                            imageOut = '/logo-coin/ton.jpg';
                         }
                         
-                        // Set the main image for the event to the 'out' asset image (hoặc 'in' tùy theo mong muốn hiển thị chính)
-                        // Hiện tại, tôi sẽ lấy ảnh của token được nhận (out) làm ảnh chính của giao dịch swap
-                        tokenImage = imageOut; 
+                        tokenImage = imageOut;
                         
-                        amountDisplay = `
+                        // amountDisplay cho swap được định dạng đặc biệt
+                        const amountDisplay = `
                             <span class="amount-swap">
-                                 <img src="${imageIn}" alt="${symbolIn}" class="swap-token-image"> ${amountIn} ${symbolIn}
+                                <img src="${imageIn}" alt="${symbolIn}" class="swap-token-image"> ${amountInFormatted} ${symbolIn}
                                 <span class="swap-arrow">🔁</span>
-                                <img src="${imageOut}" alt="${symbolOut}" class="swap-token-image"> ${amountOut} ${symbolOut}
+                                <img src="${imageOut}" alt="${symbolOut}" class="swap-token-image"> ${amountOutFormatted} ${symbolOut}
                             </span>
                         `;
                         comment = `Swap via ${swap.dex || 'Unknown DEX'}`;
-                        eventClass = 'swap';
+                        eventClass = 'swap'; // Thêm class 'swap' cho styling
+                        // Return sớm cho swap vì amountDisplay đã được định nghĩa cục bộ
+                        return generateEventHtml(tokenImage, type, senderAddress, recipientAddress, comment, amountDisplay, eventClass, timestamp, transactionHash, linkToTonviewer, statusText);
 
                     } else if (action.type === 'NftItemTransfer' && action.NftItemTransfer) {
                         type = 'NFT Transfer';
                         senderAddress = action.NftItemTransfer.sender?.address || 'Unknown';
                         recipientAddress = action.NftItemTransfer.recipient?.address || 'Unknown';
-                        amountDisplay = `1 NFT`; // NFT không có số thập phân hay dấu chấm
+                        amountValue = '1';
+                        unit = 'NFT';
                         comment = action.NftItemTransfer.nft_info?.name || comment;
                         tokenImage = action.NftItemTransfer.nft_info?.image || tokenImage;
                         eventClass = (senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) ? 'sent' : 'received';
-                        amountDisplay = `${eventClass === 'sent' ? '-' : '+'} ${amountDisplay}`;
                     }
                     // Add other action types as needed (Liquid staking, etc.)
                     else {
                         type = action.simple_preview?.name || type;
                         comment = action.simple_preview?.description || comment;
-                        // Attempt to find an image from simple_preview.items if available
                         const previewImage = action.simple_preview?.items?.find(item => item.image)?.image;
-                        tokenImage = previewImage || 'https://via.placeholder.com/40'; // Fallback to a generic placeholder
-                        // Cố gắng định dạng amountDisplay nếu nó là số và có thể có thập phân
-                        if (action.simple_preview?.value && !isNaN(parseFloat(action.simple_preview.value))) {
-                             amountDisplay = formatEventAmount(parseFloat(action.simple_preview.value));
-                        } else {
-                             amountDisplay = action.simple_preview?.value || amountDisplay;
+                        tokenImage = previewImage || 'https://via.placeholder.com/40';
+                        amountValue = action.simple_preview?.value || '';
+                        unit = '';
+                        eventClass = ''; // Mặc định không có class sent/received nếu không rõ ràng
+
+                        // Cố gắng xác định eventClass dựa trên accounts trong simple_preview nếu có thể
+                        if (action.simple_preview?.accounts && action.simple_preview.accounts.length > 0) {
+                            const mainAccountAddress = action.simple_preview.accounts[0].address; // Có thể cần logic phức tạp hơn
+                            if (senderAddress !== 'N/A' && senderAddress.toLowerCase() === currentWalletAddress.toLowerCase()) {
+                                eventClass = 'sent';
+                            } else if (recipientAddress !== 'N/A' && recipientAddress.toLowerCase() === currentWalletAddress.toLowerCase()) {
+                                eventClass = 'received';
+                            }
                         }
-                        eventClass = '';
                     }
                 }
+                
+                // Áp dụng dấu +/- và màu sắc cho các giao dịch gửi/nhận
+                // Chỉ áp dụng nếu không phải là JettonSwap (đã xử lý riêng)
+                let finalAmountDisplay = '';
+                if (eventClass === 'sent') {
+                    finalAmountDisplay = `- ${amountValue} ${unit}`;
+                } else if (eventClass === 'received') {
+                    finalAmountDisplay = `+ ${amountValue} ${unit}`;
+                } else {
+                    finalAmountDisplay = amountValue ? `${amountValue} ${unit}` : 'N/A'; // Fallback nếu không phải gửi/nhận/swap
+                }
 
-                // Shorten addresses and comments for display
-                const shortenAddress = (addr) => addr !== 'Unknown' ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : 'Unknown';
-                const displayedComment = comment.length > 30 ? comment.slice(0, 30) + '...' : comment;
+                return generateEventHtml(tokenImage, type, senderAddress, recipientAddress, comment, finalAmountDisplay, eventClass, timestamp, transactionHash, linkToTonviewer, statusText);
+            }).join('');
+            
+            eventsOutput.insertAdjacentHTML('beforeend', eventsHtml); // Nối thêm các sự kiện mới
+            lastEventLt = newEvents[newEvents.length - 1].lt; // Cập nhật LT của sự kiện cuối cùng
 
-                return `
-                    <div class="event-item ${eventClass}">
-                        <img src="${tokenImage}" alt="Token" class="event-token-image">
-                        <div class="event-details-left">
-                            <span class="type-transaction"><strong></strong> ${type}</span>
-                            <span class="from-to-addresses"><strong>From:</strong> ${shortenAddress(senderAddress)} <br> <strong>To:</strong> ${shortenAddress(recipientAddress)}</span>
-                            <span class="comment-text"><strong>Comment:</strong> ${displayedComment}</span>
-                        </div>
-                        <div class="event-details-right">
-                            <span class="amount">${amountDisplay}</span>
-                            <span class="timestamp">${timestamp}</span>
-                            <a href="${linkToTonviewer}" target="_blank" class="status-link">${statusText} 🔗</a>
-                        </div>
-                    </div>
-                `;
+            if (newEvents.length === APP_CONFIG.EVENTS_PER_PAGE) {
+                loadMoreEventsButton.style.display = 'block'; // Hiển thị nút nếu có khả năng còn trang
+            } else {
+                loadMoreEventsButton.style.display = 'none'; // Ẩn nút nếu đã hết sự kiện
+                showToast('info', 'Đã tải toàn bộ lịch sử giao dịch.');
+            }
+        } else {
+            // Nếu không có sự kiện mới được tải
+            if (clearExisting) { // Nếu là lần tải đầu tiên và không có sự kiện
+                eventsOutput.innerHTML = '<p>Không tìm thấy lịch sử giao dịch gần đây.</p>';
+            }
+            loadMoreEventsButton.style.display = 'none'; // Ẩn nút nếu không có thêm
+            if (eventsOutput.innerHTML !== '<p>Không tìm thấy lịch sử giao dịch gần đây.</p>') {
+                showToast('info', 'Không có thêm giao dịch nào.');
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        if (clearExisting) {
+            eventsOutput.innerHTML = `<div class="error-message">Error fetching events: ${error.message}</div>`;
+        } else {
+            showToast('error', `Lỗi khi tải giao dịch: ${error.message}`);
+        }
+        loadMoreEventsButton.style.display = 'none';
+    } finally {
+        isLoadingEvents = false;
+        loadMoreEventsButton.disabled = false; // Bật lại nút
+    }
+}
+
+// Hàm trợ giúp để tạo HTML cho một sự kiện (giúp code rõ ràng hơn)
+function generateEventHtml(tokenImage, type, senderAddress, recipientAddress, comment, amountDisplay, eventClass, timestamp, transactionHash, linkToTonviewer, statusText) {
+    const shortenAddress = (addr) => addr !== 'Unknown' ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : 'Unknown';
+    const displayedComment = comment.length > 30 ? comment.slice(0, 30) + '...' : comment;
+
+    return `
+        <div class="event-item ${eventClass}">
+            <img src="${tokenImage}" alt="Token" class="event-token-image">
+            <div class="event-details-left">
+                <span class="type-transaction"><strong></strong> ${type}</span>
+                <span class="from-to-addresses"><strong>From:</strong> ${shortenAddress(senderAddress)} <br> <strong>To:</strong> ${shortenAddress(recipientAddress)}</span>
+                <span class="comment-text"><strong>Comment:</strong> ${displayedComment}</span>
+            </div>
+            <div class="event-details-right">
+                <span class="amount">${amountDisplay}</span>
+                <span class="timestamp">${timestamp}</span>
+                <a href="${linkToTonviewer}" target="_blank" class="status-link">${statusText} 🔗</a>
+            </div>
+        </div>
+    `;
+
+
             }).join('');
         } else {
             eventsOutput.innerHTML = '<p>Không tìm thấy lịch sử giao dịch gần đây.</p>';
