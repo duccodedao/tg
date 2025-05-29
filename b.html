@@ -31,6 +31,15 @@
             --skeleton-shine-color: #9c9c9c;
             --price-impact-color: #e64646;
         }
+
+        body {
+            display: flex; /* Bật Flexbox */
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            align-items: center; /* Căn giữa theo chiều dọc */
+            min-height: 100vh; /* Đảm bảo body chiếm toàn bộ chiều cao khung nhìn */
+            margin: 0; /* Xóa margin mặc định của body */
+            background-color: #1a202c; /* Đặt màu nền tối cho body */
+        }
     </style>
 </head>
 
@@ -38,10 +47,9 @@
     <div id="swap-widget"></div>
     <script type="module">
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://mytonswap.com/wallet/manifest.json',
+            manifestUrl: 'https://bmweb.site/tonconnect-manifest.json',
         });
         createSwap("swap-widget", { tonConnectInstance: tonConnectUI });
-    </script>
     </script>
 </body>
 
