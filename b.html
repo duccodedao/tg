@@ -1,74 +1,166 @@
 <!DOCTYPE html>
-<html lang="en" class="mts-dark">
-
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BMSwap Tonconnect</title>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/gh/duccodedao/web@main/js/swap.js"></script>
+    <title>Web App Footer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* CSS Variables */
         :root {
-            --border-color: #f4f4f5;
-            --primary-color: #22c55e;
-            --secondary-color: #ebebeb;
-            --background-color: #ffffff;
-            --modal-background-color: #ffffff;
-            --swap-container-background: #f4f4f5;
-            --swap-container-border-color: #ffffff;
-            --input-card-color: #ffffff;
-            --input-card-pay-color: #ffffff;
-            --input-card-receive-color: #d0d5dd;
-            --input-token-color: #f4f4f5;
-            --change-direction-background-color: #22c55e;
-            --change-direction-icon-color: #f4f4f5;
-            --light-shade-color: #f4f4f5;
-            --slippage-box-color: #71717a;
-            --text-black-color: #000000;
-            --text-white-color: #ffffff;
-            --text-fade-color: #9caacb;
-            --skeleton-shine-color: #9c9c9c;
-            --price-impact-color: #e64646;
+            --footer-bg-color: #2c2c2c; /* Màu nền footer */
+            --footer-text-color: #888; /* Màu chữ mặc định */
+            --footer-active-color: #007bff; /* Màu khi mục được chọn (xanh dương) */
+            --footer-padding: 10px 0;
+            --icon-size: 20px;
+            --text-size: 12px;
         }
 
         body {
-            font-family: sans-serif;
-            display: flex; /* Bật Flexbox */
-            justify-content: center; /* Căn giữa theo chiều ngang */
-            align-items: center; /* Căn giữa theo chiều dọc */
-            min-height: 100vh; /* Đảm bảo body chiếm toàn bộ chiều cao khung nhìn */
-            margin: 0; /* Xóa margin mặc định của body */
-            background-color: #1a202c; /* Đặt màu nền tối cho body */
+            margin: 0;
+            padding-bottom: 70px; /* Đảm bảo nội dung không bị footer che mất */
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        footer {
+            position: fixed; /* Giữ footer ở cuối màn hình */
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--footer-bg-color);
+            padding: var(--footer-padding);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Tạo bóng đổ nhẹ */
+            display: flex; /* Sử dụng Flexbox để căn chỉnh các mục */
+            justify-content: space-around; /* Phân bổ đều các mục */
+            align-items: center;
+            z-index: 1000; /* Đảm bảo footer nằm trên cùng */
+        }
+
+        .footer-item {
+            display: flex;
+            flex-direction: column; /* Icon và text xếp chồng lên nhau */
+            align-items: center;
+            text-decoration: none; /* Bỏ gạch chân link */
+            color: var(--footer-text-color);
+            font-size: var(--text-size);
+            padding: 5px;
+            transition: color 0.3s ease; /* Hiệu ứng chuyển đổi màu mượt mà */
+            flex: 1; /* Mỗi item chiếm phần bằng nhau */
+        }
+
+        .footer-item i {
+            font-size: var(--icon-size);
+            margin-bottom: 4px; /* Khoảng cách giữa icon và text */
+        }
+
+        .footer-item.active {
+            color: var(--footer-active-color); /* Màu khi mục đang active */
+        }
+
+        /* Tùy chỉnh màu sắc và icon nếu cần theo chủ đề */
+        .footer-item[data-page="wallet"].active i,
+        .footer-item[data-page="wallet"].active span {
+            color: #ffaa00; /* Màu cam cho Jetton */
+        }
+
+        .footer-item[data-page="ton"].active i,
+        .footer-item[data-page="ton"].active span {
+            color: #0098ea; /* Màu xanh của TON */
+        }
+
+        .footer-item[data-page="coin"].active i,
+        .footer-item[data-page="coin"].active span {
+            color: #ffd700; /* Màu vàng của Coin */
+        }
+
+        .footer-item[data-page="profile"].active i,
+        .footer-item[data-page="profile"].active span {
+            color: #e91e63; /* Màu hồng cho Profile */
+        }
+
+        .footer-item[data-page="swap"].active i,
+        .footer-item[data-page="swap"].active span {
+            color: #7b68ee; /* Màu tím cho Swap */
         }
     </style>
 </head>
-
 <body>
-    <div id="swap-widget"></div>
-    <script type="module">
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://bmweb.site/tonconnect-manifest.json',
-        });
-        createSwap("swap-widget", { tonConnectInstance: tonConnectUI });
-    </script>
 
+    <main style="padding: 20px;">
+        <h1>Chào mừng đến với Web App của bạn!</h1>
+        <p>Đây là nội dung chính của trang. Footer sẽ luôn ở cuối màn hình.</p>
+        <p>Thử nhấp vào các mục trên footer để xem hiệu ứng và cách hoạt động của JavaScript.</p>
+        <div style="height: 800px; background-color: #e0e0e0; margin-top: 20px; display: flex; align-items: center; justify-content: center;">
+            Cuộn xuống để thấy footer cố định
+        </div>
+    </main>
 
-    
+    <footer>
+        <a href="/wallet/wallet2.html" class="footer-item" data-page="wallet">
+            <i class="fas fa-wallet"></i>
+            <span>Jetton</span>
+        </a>
+
+        <a href="/wallet/index.html" class="footer-item" data-page="ton">
+            <i class="fas fa-gem"></i>
+            <span>TON</span>
+        </a>
+
+        <a href="/jetton/index.html" class="footer-item" data-page="coin">
+            <i class="fas fa-coins"></i>
+            <span>Coin</span>
+        </a>
+
+        <a href="/profile/index.html" class="footer-item" data-page="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+
+        <a href="/swap/swap.html" class="footer-item" data-page="swap">
+            <i class="fas fa-exchange-alt"></i> <span>Swap</span>
+        </a>
+    </footer>
+
     <script>
-    // --- Khởi tạo Telegram Web App ---
-tg.ready();
-tg.BackButton.show();
-tg.BackButton.onClick(() => {
-    // Xử lý logic back button
-    if (jettonInfoPopup.style.display === 'block') {
-        jettonInfoPopup.style.display = 'none';
-    } else if (txDetailPopup.style.display === 'block') {
-        txDetailPopup.style.display = 'none';
-    } else {
-        window.history.back();
-    }
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            const footerItems = document.querySelectorAll('.footer-item');
+
+            // Hàm để đặt mục active
+            function setActiveItem() {
+                const currentPagePath = window.location.pathname;
+
+                footerItems.forEach(item => {
+                    item.classList.remove('active'); // Xóa trạng thái active khỏi tất cả
+                    const itemHref = item.getAttribute('href');
+
+                    // Kiểm tra xem href của item có khớp với đường dẫn hiện tại không
+                    // Hoặc kiểm tra dựa vào data-page nếu bạn có nhiều trang con cho cùng 1 mục
+                    if (currentPagePath === itemHref ||
+                        (currentPagePath.includes('/wallet/') && item.dataset.page === 'wallet' && itemHref.includes('/wallet/')) ||
+                        (currentPagePath.includes('/jetton/') && item.dataset.page === 'coin' && itemHref.includes('/jetton/')) ||
+                        (currentPagePath.includes('/profile/') && item.dataset.page === 'profile' && itemHref.includes('/profile/')) ||
+                        (currentPagePath.includes('/swap/') && item.dataset.page === 'swap' && itemHref.includes('/swap/'))
+                        ) {
+                        item.classList.add('active'); // Thêm active cho mục phù hợp
+                    }
+                });
+            }
+
+            // Gọi khi trang tải xong
+            setActiveItem();
+
+            // Bạn có thể thêm sự kiện click để cập nhật active ngay lập tức
+            // (Mặc dù khi điều hướng trang sẽ tự tải lại và gọi setActiveItem)
+            footerItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Để tránh lỗi nếu bạn đang dùng các thư viện SPA Router,
+                    // thường không cần gọi setActiveItem ở đây mà để router xử lý.
+                    // Nếu là trang web truyền thống, nó sẽ reload và tự active.
+                    // activeItem dựa vào path.
+                });
+            });
+        });
     </script>
 </body>
-
 </html>
