@@ -56,19 +56,16 @@
 
     
     <script>
-    // --- Khởi tạo Telegram Web App ---
+// Khởi tạo Telegram Web App
+const tg = window.Telegram.WebApp;
 tg.ready();
+
+// Hiển thị nút Back và xử lý sự kiện click
 tg.BackButton.show();
 tg.BackButton.onClick(() => {
-    // Xử lý logic back button
-    if (jettonInfoPopup.style.display === 'block') {
-        jettonInfoPopup.style.display = 'none';
-    } else if (txDetailPopup.style.display === 'block') {
-        txDetailPopup.style.display = 'none';
-    } else {
-        window.history.back();
-    }
+    window.history.back();
 });
+
     </script>
 </body>
 
