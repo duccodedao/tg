@@ -647,25 +647,61 @@ color: #000000; /* màu xanh dương */
 
 
 
+  <footer>
+    <a href="/wallet/wallet2.html" class="footer-item" data-page="wallet" title="Jetton" aria-label="Jetton">
+      <i class="fas fa-wallet"></i>
+      <span>Jetton</span>
+    </a>
 
-<footer>
-        <a href="/wallet/wallet2.html" class="footer-item" data-page="wallet">
-            <i class="fas fa-wallet"></i>
-            <span>Jetton</span>
-        </a>
+    <a href="/wallet/index.html" class="footer-item" data-page="ton" title="TON" aria-label="TON">
+      <i class="fas fa-gem"></i>
+      <span>TON</span>
+    </a>
 
-        <a href="/wallet/index.html" class="footer-item" data-page="ton">
-            <i class="fas fa-gem"></i> <span>TON</span>
-        </a>
-        <a href="/jetton/index.html" class="footer-item" data-page="jetton">
-            <i class="fas fa-coins"></i>
-            <span>Coin</span>
+    <a href="/jetton/index.html" class="footer-item" data-page="coin" title="Coin" aria-label="Coin">
+      <i class="fas fa-coins"></i>
+      <span>Coin</span>
+    </a>
 
-        <a href="/profile/index.html" class="footer-item" data-page="profile">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-        </a>
-</footer>
+    <a href="/profile/index.html" class="footer-item" data-page="profile" title="Profile" aria-label="Profile">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+
+    <a href="/swap/swap.html" class="footer-item" data-page="swap" title="Swap" aria-label="Swap">
+      <i class="fas fa-exchange-alt"></i>
+      <span>Swap</span>
+    </a>
+  </footer>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const items = document.querySelectorAll(".footer-item");
+      const path = window.location.pathname;
+
+      items.forEach(item => {
+        const href = item.getAttribute("href");
+        const page = item.dataset.page;
+
+        const isActive =
+          (path.startsWith("/wallet/") && page === "wallet") ||
+          (path.startsWith("/jetton/") && page === "coin") ||
+          (path.startsWith("/profile/") && page === "profile") ||
+          (path.startsWith("/swap/") && page === "swap") ||
+          (path === href);
+
+        if (isActive) {
+          item.classList.add("active");
+        } else {
+          item.classList.remove("active");
+        }
+      });
+    });
+  </script>
+
+
+
   <script>
     const currentPage = location.pathname.split("/").pop();
     const items = document.querySelectorAll(".footer-item");
