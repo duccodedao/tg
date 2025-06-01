@@ -1,4 +1,20 @@
+
+// Khởi tạo Telegram Web App
 const tg = window.Telegram.WebApp;
+tg.ready();
+
+// Hiển thị nút Back
+tg.BackButton.show();
+tg.BackButton.onClick(() => {
+    window.history.back();
+});
+
+// 👉 Hiển thị nút "MainButton" như nút "Close"
+tg.MainButton.setText("Close App");
+tg.MainButton.show();
+tg.MainButton.onClick(() => {
+    tg.close(); // Gọi API để đóng mini app
+});
 
 let balanceTon = 0; // Khai báo biến toàn cục để lưu số dư
 
