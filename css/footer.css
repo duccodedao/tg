@@ -9,10 +9,10 @@
         }
 
         body {
-            margin: 0;
+
             padding-bottom: 70px; /* Đảm bảo nội dung không bị footer che mất */
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+
+
         }
 
         footer {
