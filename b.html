@@ -51,6 +51,24 @@
         });
         createSwap("swap-widget", { tonConnectInstance: tonConnectUI });
     </script>
+
+
+    
+    <script>
+    // --- Khởi tạo Telegram Web App ---
+tg.ready();
+tg.BackButton.show();
+tg.BackButton.onClick(() => {
+    // Xử lý logic back button
+    if (jettonInfoPopup.style.display === 'block') {
+        jettonInfoPopup.style.display = 'none';
+    } else if (txDetailPopup.style.display === 'block') {
+        txDetailPopup.style.display = 'none';
+    } else {
+        window.history.back();
+    }
+});
+    </script>
 </body>
 
 </html>
