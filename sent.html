@@ -64,7 +64,48 @@
         .info-box p {
             margin: 5px 0;
         }
-        .info-box strsite/tonconnect-manifest.json', // !!! QUAN TRỌNG: Thay thế bằng URL manifest thực tế của bạn
+        .info-box strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ứng Dụng Gửi Giao Dịch TON</h1>
+
+    <div id="ton-connect-button"></div>
+
+    <button id="sendTransactionBtn" disabled>
+        Gửi 0.01 TON
+    </button>
+
+    <button id="sendTransactionWithCommentBtn" disabled>
+        Gửi 0.01 TON với Comment
+    </button>
+
+    <div class="info-box">
+        <p><strong>Lưu ý:</strong></p>
+        <p>- Để chạy ứng dụng này, bạn cần host nó trên một máy chủ web (ví dụ: dùng Live Server của VS Code, Apache, Nginx, hoặc GitHub Pages).</p>
+        <p>- Thay thế <code>https://your-domain.com/tonconnect-manifest.json</code> bằng URL thực tế của file manifest và miền ứng dụng của bạn.</p>
+        <p>- File <code>tonconnect-manifest.json</code> phải được đặt ở thư mục gốc của domain bạn host app. Ví dụ:</p>
+        <pre><code>
+{
+  "url": "https://your-domain.com",
+  "name": "TON DApp của tôi",
+  "iconUrl": "https://your-domain.com/icon.png"
+}
+        </code></pre>
+        <p>- Thay thế địa chỉ ví người nhận <code>EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0</code> bằng địa chỉ ví bạn muốn gửi tiền đến.</p>
+        <p>- Số lượng TONcoin được tính bằng **nanotons** (1 TON = 1,000,000,000 nanotons).</p>
+    </div>
+
+    <script>
+        let tonConnectUI;
+
+        // Chạy khi trang web được tải xong
+        window.onload = async () => {
+            // Khởi tạo TON Connect UI
+            tonConnectUI = new TonConnectUI.TonConnectUI({
+                manifestUrl: 'https://bmweb.site/tonconnect-manifest.json', // !!! QUAN TRỌNG: Thay thế bằng URL manifest thực tế của bạn
                 buttonRootId: 'ton-connect-button' // ID của phần tử HTML nơi nút kết nối sẽ được gắn
             });
 
