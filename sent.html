@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Giao Dịch TON với Comment</title>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            color: #666666;
+            transform: none;
+        }
+        button:not(:disabled) {
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+        button:not(:disabled):hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        #ton-connect-button {
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 30px;
+            text-align: left;
+            max-width: 500px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .info-box p {
+            margin: 5px 0;
+        }
+        .info-box strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ứng Dụng Gửi Giao Dịch TON</h1>
+
+    <div id="ton-connect-button"></div>
+
+    <button id="sendTransactionBtn" disabled>
+        Gửi 0.01 TON
+    </button>
+
+    <button id="sendTransactionWithCommentBtn" disabled>
+        Gửi 0.01 TON với Comment
+    </button>
+
+    <div class="info-box">
+        <p><strong>Lưu ý:</strong></p>
+        <p>- Để chạy ứng dụng này, bạn cần host nó trên một máy chủ web (ví dụ: dùng Live Server của VS Code, Apache, Nginx, hoặc GitHub Pages).</p>
+        <p>- Thay thế <code>https://your-domain.com/tonconnect-manifest.json</code> bằng URL thực tế của file manifest và miền ứng dụng của bạn.</p>
+        <p>- File <code>tonconnect-manifest.json</code> phải được đặt ở thư mục gốc của domain bạn host app. Ví dụ:</p>
+        <pre><code>
+{
+  "url": "https://your-domain.com",
+  "name": "TON DApp của tôi",
+  "iconUrl": "https:/site/tonconnect-manifest.json', // !!! QUAN TRỌNG: Thay thế bằng URL manifest thực tế của bạn
+                buttonRootId: 'ton-connect-button' // ID của phần tử HTML nơi nút kết nối sẽ được gắn
+            });
+
+            // Lấy tham chiếu đến các nút
+            const sendBtn = document.getElementById('sendTransactionBtn');
+            const sendCommentBtn = document.getElementById('sendTransactionWithCommentBtn');
+
+            // Lắng nghe sự kiện thay đổi trạng thái kết nối ví
+            tonConnectUI.onStatusChange(walletInfo => {
+                if (walletInfo) {
+                    // Nếu ví đã kết nối, kích hoạt các nút gửi giao dịch
+                    sendBtn.disabled = false;
+                    sendCommentBtn.disabled = false;
+                    console.log("Ví đã kết nối:", walletInfo.account.address);
+                } else {
+                    // Nếu ví đã ngắt kết nối, vô hiệu hóa các nút
+                    sendBtn.disabled = true;
+                    sendCommentBtn.disabled = true;
+                    console.log("Ví đã ngắt kết nối.");
+                }
+            });
+
+            // Lắng nghe sự kiện click cho nút "Gửi 0.01 TON" (cơ bản)
+            sendBtn.addEventListener('click', async () => {
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 60, // Giao dịch hợp lệ trong 60 giây
+                    messages: [
+                        {
+                            address: "UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD", // !!! Thay thế bằng địa chỉ ví người nhận
+                            amount: "10000000" // 10.000.000 nanotons = 0.01 TON
+                        }
+                    ]
+                };
+
+                try {
+                    const result = await tonConnectUI.sendTransaction(transaction);
+                    alert('Giao dịch đã gửi thành công! Tx hash: ' + result.boc);
+                    console.log('Kết quả giao dịch:', result);
+                } catch (e) {
+                    alert('Lỗi khi gửi giao dịch: ' + e.message);
+                    console.error('Lỗi khi gửi giao dịch:', e);
+                }
+            });
+
+            // Lắng nghe sự kiện click cho nút "Gửi 0.01 TON với Comment"
+            sendCommentBtn.addEventListener('click', async () => {
+                const comment = "Xin chào từ DApp TON của tôi!"; // Nội dung comment của bạn
+                
+                // Mã hóa chuỗi comment thành UTF-8 bytes
+                const encoder = new TextEncoder();
+                const encodedComment = encoder.encode(comment);
+
+                // Tạo một Uint8Array mới chứa opcode (4 byte 0x00000000) và comment đã mã hóa
+                const payloadBytes = new Uint8Array(4 + encodedComment.length);
+                payloadBytes.set([0, 0, 0, 0], 0); // Opcode 0x00000000 cho text comment
+                payloadBytes.set(encodedComment, 4); // Thêm comment vào sau opcode
+
+                // Chuyển Uint8Array sang chuỗi hex để làm payload
+                const payloadHex = Array.from(payloadBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+
+                const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 60, // Giao dịch hợp lệ trong 60 giây
+                    messages: [
+                        {
+                            address: "UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD", // !!! Thay thế bằng địa chỉ ví người nhận
+                            amount: "10000000", // 10.000.000 nanotons = 0.01 TON
+                            payload: payloadHex // Payload chứa comment
+                        }
+                    ]
+                };
+
+                try {
+                    const result = await tonConnectUI.sendTransaction(transaction);
+                    alert('Giao dịch kèm comment đã gửi thành công! Tx hash: ' + result.boc);
+                    console.log('Kết quả giao dịch kèm comment:', result);
+                } catch (e) {
+                    alert('Lỗi khi gửi giao dịch kèm comment: ' + e.message);
+                    console.error('Lỗi khi gửi giao dịch kèm comment:', e);
+                }
+            });
+        };
+    </script>
+</body>
+</html>
