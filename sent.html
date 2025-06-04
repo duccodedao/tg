@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi Giao Dịch TON với Comment</title>
+    <title>Ứng Dụng Gửi Giao Dịch TON</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         body {
@@ -21,6 +21,7 @@
         h1 {
             color: #333;
             margin-bottom: 30px;
+            text-align: center;
         }
         button {
             padding: 12px 25px;
@@ -67,6 +68,11 @@
         .info-box strong {
             color: #333;
         }
+        .highlight {
+            color: #d63384; /* Màu hồng đậm cho địa chỉ/URL */
+            font-weight: bold;
+            word-break: break-all; /* Đảm bảo địa chỉ dài không bị tràn */
+        }
     </style>
 </head>
 <body>
@@ -74,28 +80,20 @@
 
     <div id="ton-connect-button"></div>
 
-    <button id="sendTransactionBtn" disabled>
+    <button id="sendTransactionBtn">
         Gửi 0.01 TON
     </button>
 
-    <button id="sendTransactionWithCommentBtn" disabled>
+    <button id="sendTransactionWithCommentBtn">
         Gửi 0.01 TON với Comment
     </button>
 
     <div class="info-box">
-        <p><strong>Lưu ý:</strong></p>
-        <p>- Để chạy ứng dụng này, bạn cần host nó trên một máy chủ web (ví dụ: dùng Live Server của VS Code, Apache, Nginx, hoặc GitHub Pages).</p>
-        <p>- Thay thế <code>https://your-domain.com/tonconnect-manifest.json</code> bằng URL thực tế của file manifest và miền ứng dụng của bạn.</p>
-        <p>- File <code>tonconnect-manifest.json</code> phải được đặt ở thư mục gốc của domain bạn host app. Ví dụ:</p>
-        <pre><code>
-{
-  "url": "https://your-domain.com",
-  "name": "TON DApp của tôi",
-  "iconUrl": "https://your-domain.com/icon.png"
-}
-        </code></pre>
-        <p>- Thay thế địa chỉ ví người nhận <code>EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0</code> bằng địa chỉ ví bạn muốn gửi tiền đến.</p>
-        <p>- Số lượng TONcoin được tính bằng **nanotons** (1 TON = 1,000,000,000 nanotons).</p>
+        <p><strong>Thông tin cấu hình:</strong></p>
+        <p>- Địa chỉ ví nhận: <span class="highlight">UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD</span></p>
+        <p>- URL Manifest: <span class="highlight">https://bmweb.site/tonconnect-manifest.json</span></p>
+        <p>Để ứng dụng hoạt động, bạn cần host nó trên một máy chủ web tại miền tương ứng với URL Manifest.</p>
+        <p>Số lượng TONcoin được tính bằng **nanotons** (1 TON = 1,000,000,000 nanotons).</p>
     </div>
 
     <script>
@@ -103,9 +101,9 @@
 
         // Chạy khi trang web được tải xong
         window.onload = async () => {
-            // Khởi tạo TON Connect UI
+            // Khởi tạo TON Connect UI với URL manifest đã cung cấp
             tonConnectUI = new TonConnectUI.TonConnectUI({
-                manifestUrl: 'https://bmweb.site/tonconnect-manifest.json', // !!! QUAN TRỌNG: Thay thế bằng URL manifest thực tế của bạn
+                manifestUrl: 'https://bmweb.site/tonconnect-manifest.json', // Đã được cấu hình
                 buttonRootId: 'ton-connect-button' // ID của phần tử HTML nơi nút kết nối sẽ được gắn
             });
 
@@ -134,7 +132,7 @@
                     validUntil: Math.floor(Date.now() / 1000) + 60, // Giao dịch hợp lệ trong 60 giây
                     messages: [
                         {
-                            address: "UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD", // !!! Thay thế bằng địa chỉ ví người nhận
+                            address: "UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD", // Địa chỉ ví nhận
                             amount: "10000000" // 10.000.000 nanotons = 0.01 TON
                         }
                     ]
@@ -152,7 +150,7 @@
 
             // Lắng nghe sự kiện click cho nút "Gửi 0.01 TON với Comment"
             sendCommentBtn.addEventListener('click', async () => {
-                const comment = "Xin chào từ DApp TON của tôi!"; // Nội dung comment của bạn
+                const comment = "Xin chào từ DApp của tôi!"; // Nội dung comment của bạn
                 
                 // Mã hóa chuỗi comment thành UTF-8 bytes
                 const encoder = new TextEncoder();
@@ -164,13 +162,14 @@
                 payloadBytes.set(encodedComment, 4); // Thêm comment vào sau opcode
 
                 // Chuyển Uint8Array sang chuỗi hex để làm payload
+                // `toString(16)` chuyển byte sang hex, `padStart(2, '0')` thêm số 0 ở đầu nếu cần
                 const payloadHex = Array.from(payloadBytes, byte => byte.toString(16).padStart(2, '0')).join('');
 
                 const transaction = {
                     validUntil: Math.floor(Date.now() / 1000) + 60, // Giao dịch hợp lệ trong 60 giây
                     messages: [
                         {
-                            address: "UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD", // !!! Thay thế bằng địa chỉ ví người nhận
+                            address: "UQDu8vyZSZbAYvRRQ_jW4_0EiBGibAGq72wSZjYWRmNAGhRD", // Địa chỉ ví nhận
                             amount: "10000000", // 10.000.000 nanotons = 0.01 TON
                             payload: payloadHex // Payload chứa comment
                         }
